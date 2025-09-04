@@ -2,6 +2,7 @@ import { Route, Routes } from "react-router-dom";
 import Layout from "@/components/Layout";
 import ChatPage from "@/pages/ChatPage";
 import LearnPage from "@/pages/LearnPage";
+import AdminSandboxPage from "@/pages/AdminSandboxPage";
 import { Toaster } from "react-hot-toast";
 
 export default function App() {
@@ -10,6 +11,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<ChatPage />} />
         <Route path="/learn" element={<LearnPage />} />
+        <Route path="/admin" element={<AdminSandboxPage />} />
       </Routes>
       <Toaster position="top-right" />
     </Layout>

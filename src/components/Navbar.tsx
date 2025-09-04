@@ -8,6 +8,7 @@ export default function Navbar() {
 	    <div className="flex items-center gap-4 text-sm">
 	      <NavLink to="/" className={({isActive})=> isActive?"underline":undefined}>Chat</NavLink>
 	      <NavLink to="/learn" className={({isActive})=> isActive?"underline":undefined}>Learn</NavLink>
+	      <NavLink to="/admin" className={({isActive})=> isActive?"underline":undefined}>Admin</NavLink>
 	    </div>
 	  </div>
 	</nav>
