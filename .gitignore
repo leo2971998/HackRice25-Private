@@ -92,3 +92,9 @@ temp/
 
 # OS generated files
 Thumbs.db
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
