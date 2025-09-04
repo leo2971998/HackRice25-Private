@@ -7,6 +7,8 @@ import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import Onboarding from "@/pages/Onboarding";
 import Dashboard from "@/pages/Dashboard";
+import LandingPage from "@/pages/LandingPage";
+import DemoDashboard from "@/pages/DemoDashboard";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { AuthProvider } from "@/context/Auth";
 import { Toaster } from "react-hot-toast";
@@ -15,9 +17,15 @@ export default function App() {
   return (
     <AuthProvider>
       <Routes>
+        {/* Landing page as root */}
+        <Route path="/" element={<LandingPage />} />
+        
         {/* Public routes */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        
+        {/* Demo dashboard (public for demo purposes) */}
+        <Route path="/dashboard-demo" element={<DemoDashboard />} />
         
         {/* Protected routes */}
         <Route path="/onboarding" element={
@@ -33,13 +41,21 @@ export default function App() {
         } />
         
         {/* Layout-wrapped routes */}
-        <Route path="/*" element={
+        <Route path="/chat" element={
           <Layout>
-            <Routes>
-              <Route path="/" element={<ChatPage />} />
-              <Route path="/learn" element={<LearnPage />} />
-              <Route path="/admin" element={<AdminSandboxPage />} />
-            </Routes>
+            <ChatPage />
+          </Layout>
+        } />
+        
+        <Route path="/learn" element={
+          <Layout>
+            <LearnPage />
+          </Layout>
+        } />
+        
+        <Route path="/admin" element={
+          <Layout>
+            <AdminSandboxPage />
           </Layout>
         } />
       </Routes>

@@ -1,0 +1,242 @@
+# routes/demo.py
+import os, requests, sqlite3, uuid, time, json
+from flask import Blueprint, request, jsonify, g
+from .auth import require_auth, db
+
+BASE = os.getenv("NESSIE_BASE", "https://api.nessieisreal.com")
+API_KEY = os.environ.get("NESSIE_API_KEY", "")
+USE_MOCK = os.environ.get("USE_MOCK", "0") == "1"
+
+bp = Blueprint("demo", __name__)
+
+def nx(path): 
+    return f"{BASE}{path}?key={API_KEY}"
+
+# Cache for mock data
+DEMO_CACHE = {}
+
+# Mock data for when Nessie API is unavailable
+MOCK_SUMMARY_DATA = {
+    "total_balance": 1140.85,
+    "accounts": [{
+        "_id": "mock_account_001",
+        "type": "Checking",
+        "nickname": "Main Checking",
+        "balance": 1140.85,
+        "rewards": 0
+    }],
+    "recent_transactions": [
+        {"description": "Metro Transit", "amount": 15.00, "purchase_date": "2025-01-15", "type": "purchase"},
+        {"description": "CVS Pharmacy", "amount": 28.47, "purchase_date": "2025-01-14", "type": "purchase"},
+        {"description": "Starbucks", "amount": 4.95, "purchase_date": "2025-01-13", "type": "purchase"},
+        {"description": "Shell Gas Station", "amount": 45.20, "purchase_date": "2025-01-12", "type": "purchase"},
+        {"description": "H-E-B Groceries", "amount": 87.33, "purchase_date": "2025-01-11", "type": "purchase"},
+        {"description": "Uber Ride", "amount": 12.50, "purchase_date": "2025-01-10", "type": "purchase"},
+        {"description": "Paycheck Deposit", "amount": 1350.00, "transaction_date": "2025-01-09", "type": "deposit"}
+    ],
+    "customer_id": "demo_customer_mock"
+}
+
+def get_frozen_seed_data():
+    """Returns the frozen seed dataset: 1 deposit + 6 varied purchases"""
+    return {
+        "deposit": {
+            "amount": 1350.00,
+            "description": "Paycheck Deposit",
+            "transaction_date": "2025-01-09"
+        },
+        "purchases": [
+            {"amount": 87.33, "description": "H-E-B Groceries", "purchase_date": "2025-01-11"},
+            {"amount": 45.20, "description": "Shell Gas Station", "purchase_date": "2025-01-12"},
+            {"amount": 4.95, "description": "Starbucks Coffee", "purchase_date": "2025-01-13"},
+            {"amount": 28.47, "description": "CVS Pharmacy", "purchase_date": "2025-01-14"},
+            {"amount": 12.50, "description": "Uber Ride", "purchase_date": "2025-01-10"},
+            {"amount": 15.00, "description": "Metro Transit", "purchase_date": "2025-01-15"}
+        ]
+    }
+
+def find_existing_demo_user():
+    """Find existing demo user for current API key"""
+    # Look for users with a special demo email pattern or flag
+    demo_email = f"demo_user_{API_KEY[-8:] if API_KEY else 'default'}@demo.local"
+    row = db().execute("SELECT * FROM users WHERE email=?", (demo_email,)).fetchone()
+    return dict(row) if row else None
+
+def create_demo_user():
+    """Create a new demo user"""
+    demo_email = f"demo_user_{API_KEY[-8:] if API_KEY else 'default'}@demo.local"
+    
+    # Generate a demo customer ID
+    if USE_MOCK:
+        customer_id = f"demo_mock_{str(uuid.uuid4())[:8]}"
+    else:
+        try:
+            # Try to create a real Nessie customer
+            body = {
+                "first_name": "Demo",
+                "last_name": "User",
+                "address": {
+                    "street_number": "123",
+                    "street_name": "Main St",
+                    "city": "Houston",
+                    "state": "TX",
+                    "zip": "77002"
+                }
+            }
+            r = requests.post(nx("/customers"), json=body, timeout=20)
+            r.raise_for_status()
+            customer_id = r.json()["_id"]
+        except Exception as e:
+            print(f"Nessie API error: {e}, falling back to mock")
+            customer_id = f"demo_fallback_{str(uuid.uuid4())[:8]}"
+    
+    # Insert demo user into database
+    try:
+        db().execute(
+            "INSERT INTO users(email, password_hash, first_name, last_name, nessie_customer_id, created_at) VALUES(?,?,?,?,?,?)",
+            (demo_email, "demo_hash", "Demo", "User", customer_id, int(time.time()))
+        )
+        db().commit()
+        
+        # Get the created user
+        user = db().execute("SELECT * FROM users WHERE email=?", (demo_email,)).fetchone()
+        return dict(user)
+    except sqlite3.IntegrityError:
+        # User already exists, return it
+        user = db().execute("SELECT * FROM users WHERE email=?", (demo_email,)).fetchone()
+        return dict(user)
+
+def seed_demo_data(customer_id):
+    """Seed the demo customer with frozen dataset"""
+    if customer_id.startswith("demo_mock") or customer_id.startswith("demo_fallback") or USE_MOCK:
+        # Don't try to seed mock customers
+        return True
+    
+    try:
+        # Check if accounts exist
+        accounts_resp = requests.get(nx(f"/customers/{customer_id}/accounts"), timeout=20)
+        accounts = accounts_resp.json() if accounts_resp.status_code == 200 else []
+        
+        if not accounts:
+            # Create checking account
+            account_data = {
+                "type": "Checking",
+                "nickname": "Main Checking",
+                "rewards": 0,
+                "balance": 1350.00  # Initial balance for deposit
+            }
+            acc_resp = requests.post(nx(f"/customers/{customer_id}/accounts"), json=account_data, timeout=20)
+            acc_resp.raise_for_status()
+            account_id = acc_resp.json()["_id"]
+            
+            # Add frozen seed data
+            seed_data = get_frozen_seed_data()
+            
+            # Add deposit
+            requests.post(nx(f"/accounts/{account_id}/deposits"), json=seed_data["deposit"], timeout=20)
+            
+            # Add purchases
+            for purchase in seed_data["purchases"]:
+                requests.post(nx(f"/accounts/{account_id}/purchases"), json=purchase, timeout=20)
+                
+        return True
+    except Exception as e:
+        print(f"Error seeding demo data: {e}")
+        return False
+
+@bp.post("/demo/seed")
+def demo_seed():
+    """Create or reuse demo user - idempotent operation"""
+    try:
+        # Check for existing demo user first (idempotent behavior)
+        existing_user = find_existing_demo_user()
+        
+        if existing_user and existing_user.get("nessie_customer_id"):
+            print(f"Reusing existing demo user: {existing_user['nessie_customer_id']}")
+            return jsonify({
+                "ok": True,
+                "customer_id": existing_user["nessie_customer_id"],
+                "user_id": existing_user["id"],
+                "reused": True
+            })
+        
+        # Create new demo user
+        demo_user = create_demo_user()
+        customer_id = demo_user["nessie_customer_id"]
+        
+        # Seed with demo data
+        seed_demo_data(customer_id)
+        
+        return jsonify({
+            "ok": True,
+            "customer_id": customer_id,
+            "user_id": demo_user["id"],
+            "reused": False
+        })
+        
+    except Exception as e:
+        return jsonify({"error": f"Demo seed failed: {str(e)}"}), 500
+
+@bp.get("/demo/summary")
+def demo_summary():
+    """Get demo summary data with caching and mock fallback"""
+    try:
+        # Check if we should use mock data
+        if USE_MOCK:
+            return jsonify(MOCK_SUMMARY_DATA)
+        
+        # Try to get demo user
+        demo_user = find_existing_demo_user()
+        if not demo_user:
+            return jsonify({"error": "No demo user found. Call /demo/seed first"}), 404
+        
+        customer_id = demo_user["nessie_customer_id"]
+        
+        # If customer_id indicates mock/fallback, return mock data
+        if customer_id.startswith("demo_mock") or customer_id.startswith("demo_fallback"):
+            return jsonify(MOCK_SUMMARY_DATA)
+        
+        # Try to get real data from Nessie
+        try:
+            accounts_resp = requests.get(nx(f"/customers/{customer_id}/accounts"), timeout=20)
+            accounts = accounts_resp.json() if accounts_resp.status_code == 200 else []
+            
+            total_balance = sum(acc.get("balance", 0) for acc in accounts)
+            
+            # Get recent transactions from first account if exists
+            recent_transactions = []
+            if accounts:
+                account_id = accounts[0]["_id"]
+                # Get deposits and purchases
+                deposits_resp = requests.get(nx(f"/accounts/{account_id}/deposits"), timeout=20)
+                deposits = deposits_resp.json() if deposits_resp.status_code == 200 else []
+                purchases_resp = requests.get(nx(f"/accounts/{account_id}/purchases"), timeout=20)
+                purchases = purchases_resp.json() if purchases_resp.status_code == 200 else []
+                
+                # Combine and format transactions
+                for deposit in deposits:
+                    deposit["type"] = "deposit"
+                for purchase in purchases:
+                    purchase["type"] = "purchase"
+                
+                recent_transactions = deposits + purchases
+                # Sort by date (most recent first)
+                recent_transactions.sort(
+                    key=lambda x: x.get("transaction_date", x.get("purchase_date", "")), 
+                    reverse=True
+                )
+                recent_transactions = recent_transactions[:25]  # Last 25 transactions
+            
+            return jsonify({
+                "total_balance": total_balance,
+                "accounts": accounts,
+                "recent_transactions": recent_transactions,
+                "customer_id": customer_id
+            })
+            
+        except Exception as api_error:
+            print(f"Nessie API error, falling back to mock: {api_error}")
+            return jsonify(MOCK_SUMMARY_DATA)
+            
+    except Exception as e:
+        return jsonify({"error": f"Demo summary failed: {str(e)}"}), 500
