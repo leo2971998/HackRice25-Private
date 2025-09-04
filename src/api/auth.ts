@@ -1,0 +1,20 @@
+// src/api/auth.ts
+import { api } from "./client";
+
+export const register = (body: {
+  email: string;
+  password: string;
+  first_name?: string;
+  last_name?: string;
+}) => api.post("/auth/register", body).then(r => r.data);
+
+export const login = (body: { email: string; password: string }) =>
+  api.post("/auth/login", body).then(r => r.data);
+
+export const logout = () => api.post("/auth/logout").then(r => r.data);
+
+export const me = () => api.get("/me").then(r => r.data);
+
+export const seed = () => api.post("/me/seed").then(r => r.data);
+
+export const mySummary = () => api.get("/me/summary").then(r => r.data);
