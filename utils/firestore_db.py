@@ -9,7 +9,7 @@ def get_firestore_client() -> Client:
         # Initialize Firestore client
         # In production, this will use the service account from Cloud Run
         # In development, it will use GOOGLE_APPLICATION_CREDENTIALS or default auth
-        project_id = os.getenv('GOOGLE_CLOUD_PROJECT', 'houston-financial-navigator')
+        project_id = os.getenv('GOOGLE_CLOUD_PROJECT', 'gen-lang-client-0536110235')
         return firestore.Client(project=project_id)
     except Exception as e:
         print(f"Warning: Could not initialize Firestore client: {e}")
