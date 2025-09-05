@@ -17,30 +17,49 @@ export default function App() {
   return (
     <AuthProvider>
       <Routes>
-        {/* Landing page as root */}
-        <Route path="/" element={<LandingPage />} />
+        {/* All routes now use Layout for consistent navbar */}
+        <Route path="/" element={
+          <Layout>
+            <LandingPage />
+          </Layout>
+        } />
         
-        {/* Public routes */}
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/login" element={
+          <Layout>
+            <LoginPage />
+          </Layout>
+        } />
+        
+        <Route path="/register" element={
+          <Layout>
+            <RegisterPage />
+          </Layout>
+        } />
         
         {/* Demo dashboard (public for demo purposes) */}
-        <Route path="/dashboard-demo" element={<DemoDashboard />} />
+        <Route path="/dashboard-demo" element={
+          <Layout>
+            <DemoDashboard />
+          </Layout>
+        } />
         
         {/* Protected routes */}
         <Route path="/onboarding" element={
-          <ProtectedRoute>
-            <Onboarding />
-          </ProtectedRoute>
+          <Layout>
+            <ProtectedRoute>
+              <Onboarding />
+            </ProtectedRoute>
+          </Layout>
         } />
         
         <Route path="/dashboard" element={
-          <ProtectedRoute requiresNessie>
-            <Dashboard />
-          </ProtectedRoute>
+          <Layout>
+            <ProtectedRoute requiresNessie>
+              <Dashboard />
+            </ProtectedRoute>
+          </Layout>
         } />
         
-        {/* Layout-wrapped routes */}
         <Route path="/chat" element={
           <Layout>
             <ChatPage />

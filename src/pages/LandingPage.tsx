@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { ArrowRight, DollarSign, PieChart, TrendingUp, Users, Shield, Smartphone } from "lucide-react";
+import { ArrowRight, PieChart, TrendingUp, Users, Shield, Smartphone, DollarSign } from "lucide-react";
 import toast from "react-hot-toast";
 import { api } from "@/api/client";
 
@@ -36,24 +36,6 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
-      {/* Header */}
-      <header className="relative z-10">
-        <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center space-x-2">
-              <DollarSign className="h-8 w-8 text-blue-600" />
-              <span className="text-2xl font-bold text-gray-900">Houston Financial Navigator</span>
-            </div>
-            <div className="hidden md:flex space-x-8">
-              <Link to="/login" className="text-gray-600 hover:text-gray-900 transition-colors">Sign In</Link>
-              <Link to="/register" className="text-gray-600 hover:text-gray-900 transition-colors">Sign Up</Link>
-              <Link to="/chat" className="text-gray-600 hover:text-gray-900 transition-colors">Chat</Link>
-              <Link to="/learn" className="text-gray-600 hover:text-gray-900 transition-colors">Learn</Link>
-            </div>
-          </div>
-        </nav>
-      </header>
-
       {/* Hero Section */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center">
@@ -88,12 +70,12 @@ export default function LandingPage() {
               )}
             </button>
             
-            <a
-              href="/register"
+            <Link
+              to="/register"
               className="px-8 py-4 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"
             >
               Create Account
-            </a>
+            </Link>
           </div>
         </div>
 
