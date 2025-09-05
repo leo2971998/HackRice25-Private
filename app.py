@@ -26,6 +26,7 @@ from routes.auth import bp as auth_bp
 from routes.nessie_admin import bp as nessie_admin_bp
 from routes.me_nessie import bp as me_nessie_bp
 from routes.demo import bp as demo_bp
+from routes.chat import bp as chat_bp
 
 def create_app():
     app = Flask(__name__)
@@ -46,6 +47,7 @@ def create_app():
     app.register_blueprint(nessie_admin_bp)
     app.register_blueprint(me_nessie_bp)
     app.register_blueprint(demo_bp)
+    app.register_blueprint(chat_bp)
 
     @app.get("/healthz")
     def healthz(): return "ok", 200
