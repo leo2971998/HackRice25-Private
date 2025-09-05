@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { Bot, User } from "lucide-react";
+import MarkdownMessage from "./MarkdownMessage";
 
 export default function MessageBubble({ role, children }: { role: "user" | "bot"; children: ReactNode }) {
   const isUser = role === "user";
@@ -19,12 +20,18 @@ export default function MessageBubble({ role, children }: { role: "user" | "bot"
       </div>
       
       {/* Message */}
-      <div className={`max-w-[70%] rounded-2xl px-4 py-3 text-sm shadow-sm whitespace-pre-wrap ${
+      <div className={`max-w-[70%] rounded-2xl px-4 py-3 text-sm shadow-sm ${
         isUser 
-          ? "bg-blue-600 text-white rounded-tr-md" 
+          ? "bg-blue-600 text-white rounded-tr-md whitespace-pre-wrap" 
           : "bg-white border border-gray-200 text-gray-900 rounded-tl-md"
       }`}>
-        {children}
+        {isUser ? (
+          // User messages: render as plain text with whitespace preservation
+          <div className="whitespace-pre-wrap">{children}</div>
+        ) : (
+          // Bot messages: render with markdown formatting
+          <MarkdownMessage content={children as string} />
+        )}
       </div>
     </div>
   );
