@@ -1,6 +1,12 @@
 import os, requests
 from flask import Blueprint, request, jsonify
+# routes/nessie_admin.py
+from dotenv import load_dotenv
+load_dotenv()
 
+import os
+from flask import Blueprint, jsonify, request, g
+from .auth import require_auth, db
 BASE = os.getenv("NESSIE_BASE", "https://api.nessieisreal.com")
 API_KEY = os.environ["NESSIE_API_KEY"]  # set in Cloud Run/locally
 
@@ -8,6 +14,11 @@ def nx(path: str):
     return f"{BASE}{path}?key={API_KEY}"
 
 bp = Blueprint("nessie_admin", __name__)
+
+@bp.get("/admin/status")
+@require_auth
+def admin_status():
+    return jsonify({"status": "admin ok"}), 200
 
 @bp.post("/nessie/customers")
 def create_customer():

@@ -2,7 +2,12 @@
 import os, requests, sqlite3, uuid, time
 from flask import Blueprint, request, jsonify, g
 from .auth import require_auth, db
+from dotenv import load_dotenv
+load_dotenv()
 
+import os
+from flask import Blueprint, jsonify, request, g
+from .auth import require_auth, db
 BASE = os.getenv("NESSIE_BASE", "https://api.nessieisreal.com")
 API_KEY = os.environ.get("NESSIE_API_KEY", "")
 USE_MOCK = os.environ.get("USE_MOCK", "0") == "1"
@@ -11,7 +16,10 @@ bp = Blueprint("me_nessie", __name__)
 
 def nx(path): 
     return f"{BASE}{path}?key={API_KEY}"
-
+@bp.get("/me/nessie")
+@require_auth
+def me_nessie():
+    return jsonify({"nessie": "user data"}), 200
 # Enhanced mock data for better demo experience
 ENHANCED_MOCK_SUMMARY = {
     "total_balance": 1140.85,

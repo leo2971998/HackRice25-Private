@@ -8,6 +8,9 @@ API_KEY = os.environ.get("NESSIE_API_KEY", "")
 USE_MOCK = os.environ.get("USE_MOCK", "0") == "1"
 
 bp = Blueprint("demo", __name__)
+@bp.get("/demo")
+def demo_root():
+    return jsonify({"demo": "ok"}), 200
 
 def nx(path): 
     return f"{BASE}{path}?key={API_KEY}"

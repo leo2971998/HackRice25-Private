@@ -1,3 +1,20 @@
+import pkgutil
+import importlib.util
+import sys
+
+def get_loader(name):
+    if name == "__main__":
+        class MainLoader:
+            def get_filename(self, _):
+                return sys.modules["__main__"].__file__
+        return MainLoader()
+    try:
+        spec = importlib.util.find_spec(name)
+    except ValueError:
+        return None
+    return spec.loader if spec else None
+
+pkgutil.get_loader = get_loader
 from dotenv import load_dotenv
 load_dotenv()
 
