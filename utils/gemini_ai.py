@@ -189,16 +189,45 @@ def generate_mock_response(question: str) -> Dict:
     sources = get_default_houston_sources()
     
     if "rent" in question_lower or "housing" in question_lower:
-        answer = "I found several rental assistance programs in Houston/Harris County. The Houston Housing Authority offers ongoing rental assistance for qualified low-income families, and Harris County provides emergency rental assistance. Both programs have income requirements and application processes."
+        answer = """I found several **rental assistance programs** in Houston/Harris County:
+
+- **Houston Housing Authority** offers ongoing rental assistance for qualified low-income families
+- **Harris County** provides emergency rental assistance  
+
+Both programs have income requirements and application processes. Here are your next steps:
+
+1. Check your eligibility based on income requirements
+2. Gather required documentation
+3. Submit your application online or in person"""
         relevant_sources = [s for s in sources if 'housing' in s['name'].lower() or 'rental' in s['name'].lower()]
     elif "utility" in question_lower or "electric" in question_lower or "water" in question_lower:
-        answer = "For utility assistance in Houston, CenterPoint Energy offers payment assistance programs for low-income households. There are also weatherization programs available to help reduce energy costs long-term."
+        answer = """For **utility assistance** in Houston, here are your options:
+
+- **CenterPoint Energy** offers payment assistance programs for low-income households
+- **Weatherization programs** available to help reduce energy costs long-term
+
+*Contact them directly* to learn about eligibility requirements."""
         relevant_sources = [s for s in sources if 'utility' in s['name'].lower() or 'energy' in s['name'].lower()]
     elif "food" in question_lower or "snap" in question_lower:
-        answer = "The Houston Food Bank is the largest food distribution organization in the area and provides food assistance to community members in need. They have multiple distribution sites throughout Harris County."
+        answer = """# Food Assistance Programs
+
+The **Houston Food Bank** is the largest food distribution organization in the area and provides food assistance to community members in need. 
+
+They have multiple distribution sites throughout Harris County:
+
+- Mobile food pantries
+- Partner agencies
+- Direct distribution centers"""
         relevant_sources = [s for s in sources if 'food' in s['name'].lower()]
     else:
-        answer = "I can help you find information about rental assistance, utility programs, food assistance, and homebuyer aid in Houston/Harris County. Could you be more specific about what type of help you need?"
+        answer = """I can help you find information about:
+
+- **Rental assistance** programs
+- **Utility** payment help  
+- **Food assistance** and SNAP
+- **Homebuyer aid** programs
+
+*Could you be more specific about what type of help you need?*"""
         relevant_sources = sources[:3]
     
     return {
