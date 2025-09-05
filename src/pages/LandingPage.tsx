@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { ArrowRight, DollarSign, PieChart, TrendingUp, Users, Shield, Smartphone } from "lucide-react";
 import toast from "react-hot-toast";
 import { api } from "@/api/client";
@@ -45,10 +45,10 @@ export default function LandingPage() {
               <span className="text-2xl font-bold text-gray-900">Houston Financial Navigator</span>
             </div>
             <div className="hidden md:flex space-x-8">
-              <a href="/login" className="text-gray-600 hover:text-gray-900 transition-colors">Sign In</a>
-              <a href="/register" className="text-gray-600 hover:text-gray-900 transition-colors">Sign Up</a>
-              <a href="/chat" className="text-gray-600 hover:text-gray-900 transition-colors">Chat</a>
-              <a href="/learn" className="text-gray-600 hover:text-gray-900 transition-colors">Learn</a>
+              <Link to="/login" className="text-gray-600 hover:text-gray-900 transition-colors">Sign In</Link>
+              <Link to="/register" className="text-gray-600 hover:text-gray-900 transition-colors">Sign Up</Link>
+              <Link to="/chat" className="text-gray-600 hover:text-gray-900 transition-colors">Chat</Link>
+              <Link to="/learn" className="text-gray-600 hover:text-gray-900 transition-colors">Learn</Link>
             </div>
           </div>
         </nav>
@@ -223,7 +223,7 @@ export default function LandingPage() {
             <div>
               <h4 className="font-semibold mb-4">Resources</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="/learn" className="hover:text-white transition-colors">Learn</a></li>
+                <li><Link to="/learn" className="hover:text-white transition-colors">Learn</Link></li>
                 <li><a href="#" className="hover:text-white transition-colors">Help Center</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
@@ -233,9 +233,9 @@ export default function LandingPage() {
             <div>
               <h4 className="font-semibold mb-4">Get Started</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="/register" className="hover:text-white transition-colors">Sign Up</a></li>
-                <li><a href="/login" className="hover:text-white transition-colors">Sign In</a></li>
-                <li><a href="/chat" className="hover:text-white transition-colors">Try Chat</a></li>
+                <li><Link to="/register" className="hover:text-white transition-colors">Sign Up</Link></li>
+                <li><Link to="/login" className="hover:text-white transition-colors">Sign In</Link></li>
+                <li><Link to="/chat" className="hover:text-white transition-colors">Try Chat</Link></li>
               </ul>
             </div>
           </div>
