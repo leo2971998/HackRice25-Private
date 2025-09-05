@@ -180,6 +180,42 @@ def get_default_houston_sources() -> List[Dict]:
             "eligibility": "First-time homebuyers meeting income requirements",
             "county": "Harris County",
             "last_verified": "2025-01-15"
+        },
+        {
+            "name": "CenterPoint Energy Bill Help Plus",
+            "why": "Utility assistance program for electricity and gas bills",
+            "url": "https://www.centerpointenergy.com/",
+            "phone": "(713) 207-2222",
+            "eligibility": "Low-income households facing energy hardship",
+            "county": "Harris County",
+            "last_verified": "2025-01-15"
+        },
+        {
+            "name": "Harris County Community Services - Utility Assistance",
+            "why": "Emergency assistance for utility bills including water, electric, and gas",
+            "url": "https://csd.harriscountytx.gov/",
+            "phone": "(832) 927-4400",
+            "eligibility": "Harris County residents with income at or below 150% of federal poverty level",
+            "county": "Harris County",
+            "last_verified": "2025-01-15"
+        },
+        {
+            "name": "Houston Food Bank Emergency Food",
+            "why": "Food assistance and nutrition programs for individuals and families",
+            "url": "https://www.houstonfoodbank.org/",
+            "phone": "(713) 223-3700",
+            "eligibility": "Open to all in need, no income verification required",
+            "county": "Harris County",
+            "last_verified": "2025-01-15"
+        },
+        {
+            "name": "Coalition for the Homeless - Emergency Shelter",
+            "why": "Emergency shelter and transitional housing services",
+            "url": "https://www.homelesshouston.org/",
+            "phone": "(713) 739-7514",
+            "eligibility": "Individuals and families experiencing homelessness",
+            "county": "Harris County",
+            "last_verified": "2025-01-15"
         }
     ]
 

@@ -8,6 +8,7 @@ from flask_cors import CORS
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 from utils.gemini_ai import generate_financial_assistance_response
+from utils.ai_agent import process_financial_query
 
 def create_app():
     app = Flask(__name__)
@@ -29,13 +30,15 @@ def create_app():
             if not question:
                 return jsonify({"error": "Question is required"}), 400
             
-            # Use Gemini AI to generate response
-            response = generate_financial_assistance_response(question)
+            # Use advanced AI agent to generate response
+            response = process_financial_query(question, user_context=data.get("context"))
             
             return jsonify({
                 "answer": response["answer"],
                 "sources": response["sources"],
-                "service": "ai-chatbot"
+                "service": "ai-chatbot",
+                "provider": response.get("provider", "ai-agent"),
+                "agent_used": response.get("agent_used", False)
             })
             
         except Exception as e:

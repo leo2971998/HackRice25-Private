@@ -8,6 +8,7 @@ import requests
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 from utils.gemini_ai import generate_financial_assistance_response
+from utils.ai_agent import process_financial_query
 
 bp = Blueprint("chat", __name__)
 
@@ -48,14 +49,16 @@ def ask():
         except Exception as e:
             print(f"Error calling AI service: {e}")
     
-    # Fallback to local AI processing
+    # Fallback to local AI processing with advanced agent if available
     try:
-        response = generate_financial_assistance_response(question)
+        # First try the advanced AI agent
+        response = process_financial_query(question, user_context=data.get("context"))
         
         return jsonify({
             "answer": response["answer"],
             "sources": response["sources"],
-            "provider": "local-ai"
+            "provider": response.get("provider", "ai-agent"),
+            "agent_used": response.get("agent_used", False)
         })
         
     except Exception as e:
