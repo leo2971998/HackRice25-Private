@@ -11,6 +11,7 @@ export default function RegisterPage() {
     password: "",
     first_name: "",
     last_name: "",
+    role: "user", // Default to user role
   });
   const [loading, setLoading] = useState(false);
   const nav = useNavigate();
@@ -24,8 +25,15 @@ export default function RegisterPage() {
       await register(formData);
       const user = await me();
       setUser(user);
-      nav("/onboarding");
-      toast.success("Account created successfully!");
+      
+      // Route based on user role
+      if (user.role === "admin") {
+        nav("/admin");
+        toast.success("Admin account created successfully!");
+      } else {
+        nav("/onboarding");
+        toast.success("Account created successfully!");
+      }
     } catch (error: any) {
       toast.error(error?.response?.data?.error || "Registration failed");
     } finally {
@@ -33,7 +41,7 @@ export default function RegisterPage() {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -107,6 +115,25 @@ export default function RegisterPage() {
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               placeholder="••••••••"
             />
+          </div>
+
+          <div>
+            <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
+              Account Type
+            </label>
+            <select
+              id="role"
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+            >
+              <option value="user">Regular User</option>
+              <option value="admin">Admin (For Administrators)</option>
+            </select>
+            <p className="mt-1 text-xs text-gray-500">
+              Select "Admin" only if you are setting up an administrator account for demo purposes.
+            </p>
           </div>
 
           <button
