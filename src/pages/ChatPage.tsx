@@ -33,44 +33,44 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+    <div className="min-h-screen p-4">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
-        <div className="bg-white rounded-2xl shadow-xl p-6">
+        <div className="bg-dark-200 border border-dark-400 rounded-lg shadow-lg p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full p-3">
+              <div className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-full p-3">
                 <MessageCircle className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">AI Financial Assistant</h1>
-                <p className="text-gray-600">Get personalized help finding local aid programs</p>
+                <h1 className="text-2xl font-bold text-white">AI Financial Assistant</h1>
+                <p className="text-dark-900">Get personalized help finding local aid programs</p>
               </div>
             </div>
             <div className="text-right">
-              <div className="flex items-center space-x-2 text-amber-600 bg-amber-50 px-3 py-1 rounded-full">
+              <div className="flex items-center space-x-2 text-accent-emerald bg-accent-emerald/20 px-3 py-1 rounded-full border border-accent-emerald/30">
                 <Sparkles className="h-4 w-4" />
                 <span className="text-xs font-medium">AI-Powered</span>
               </div>
-              <span className="text-xs text-gray-500 mt-1 block">Info may change — verify on source sites</span>
+              <span className="text-xs text-dark-900 mt-1 block">Info may change — verify on source sites</span>
             </div>
           </div>
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-white rounded-2xl shadow-xl p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Popular Questions</h3>
+        <div className="bg-dark-200 border border-dark-400 rounded-lg shadow-lg p-6">
+          <h3 className="text-lg font-semibold text-white mb-4">Popular Questions</h3>
           <QuickChips onPick={onAsk} />
         </div>
 
         {/* Chat Container */}
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
+        <div className="bg-dark-200 border border-dark-400 rounded-lg shadow-lg overflow-hidden">
+          <div className="bg-gradient-to-r from-primary-500 to-primary-600 px-6 py-4">
             <h3 className="text-lg font-semibold text-white">Chat with our AI Assistant</h3>
-            <p className="text-blue-100 text-sm">Ask about rent, utilities, SNAP, homebuyer aid, and more</p>
+            <p className="text-primary-100 text-sm">Ask about rent, utilities, SNAP, homebuyer aid, and more</p>
           </div>
           
-          <div ref={listRef} className="h-[60vh] overflow-auto p-6 space-y-4 bg-gray-50">
+          <div ref={listRef} className="h-[60vh] overflow-auto p-6 space-y-4 bg-dark-100/50">
             {messages.map((m, i) => (
               <div key={i} className="space-y-3">
                 <MessageBubble role={m.role}>{m.content}</MessageBubble>
