@@ -1,0 +1,57 @@
+# Cloud Run service configuration for main application
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: houston-financial-navigator
+  annotations:
+    run.googleapis.com/ingress: all
+    run.googleapis.com/execution-environment: gen2
+spec:
+  template:
+    metadata:
+      annotations:
+        run.googleapis.com/execution-environment: gen2
+        autoscaling.knative.dev/maxScale: "10"
+        run.googleapis.com/cpu-throttling: "false"
+    spec:
+      containerConcurrency: 100
+      timeoutSeconds: 300
+      containers:
+      - image: gcr.io/PROJECT_ID/houston-financial-navigator:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: NESSIE_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: nessie-api-key
+              key: key
+        - name: NESSIE_BASE
+          value: "https://api.nessieisreal.com"
+        - name: FLASK_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: flask-secret
+              key: key
+        - name: GOOGLE_CLOUD_PROJECT
+          value: "PROJECT_ID"
+        - name: AI_SERVICE_URL
+          value: "https://houston-ai-service-HASH-uc.a.run.app"
+        resources:
+          limits:
+            cpu: "1"
+            memory: "512Mi"
+        startupProbe:
+          httpGet:
+            path: /healthz
+            port: 8000
+          initialDelaySeconds: 10
+          timeoutSeconds: 5
+          periodSeconds: 10
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8000
+          timeoutSeconds: 5
+          periodSeconds: 30
