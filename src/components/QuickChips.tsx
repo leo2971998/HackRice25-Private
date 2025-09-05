@@ -7,9 +7,13 @@ const presets = [
 
 export default function QuickChips({ onPick }: { onPick: (q: string) => void }) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
       {presets.map((p) => (
-        <button key={p} onClick={() => onPick(p)} className="rounded-full border border-neutral-300 dark:border-neutral-700 px-3 py-1 text-xs hover:bg-neutral-100 dark:hover:bg-neutral-900">
+        <button 
+          key={p} 
+          onClick={() => onPick(p)} 
+          className="rounded-xl border-2 border-blue-200 bg-blue-50 hover:bg-blue-100 hover:border-blue-300 px-4 py-3 text-sm font-medium text-blue-700 transition-all duration-200 text-left hover:shadow-md"
+        >
           {p}
         </button>
       ))}
