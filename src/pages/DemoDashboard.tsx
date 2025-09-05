@@ -98,7 +98,7 @@ export default function DemoDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+      <div className="flex items-center justify-center py-12">
         <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
           <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600">Loading your demo dashboard...</p>
@@ -111,7 +111,7 @@ export default function DemoDashboard() {
   const spendingByCategory = getSpendingByCategory();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+    <div className="bg-gradient-to-br from-blue-50 to-indigo-100 p-4 min-h-[calc(100vh-8rem)]">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="bg-white rounded-2xl shadow-xl p-6">
