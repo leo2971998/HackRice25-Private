@@ -17,16 +17,21 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      await login({ email, password });
+      const loginResponse = await login({ email, password });
       const user = await me();
       setUser(user);
       
-      if (!user.nessie_customer_id) {
+      // Route based on user role
+      if (user.role === "admin") {
+        nav("/admin");
+        toast.success("Welcome back, Admin!");
+      } else if (!user.nessie_customer_id) {
         nav("/onboarding");
+        toast.success("Welcome back!");
       } else {
         nav("/dashboard");
+        toast.success("Welcome back!");
       }
-      toast.success("Welcome back!");
     } catch (error: any) {
       toast.error(error?.response?.data?.error || "Login failed");
     } finally {

@@ -8,6 +8,7 @@ type User = {
   first_name?: string;
   last_name?: string;
   nessie_customer_id?: string;
+  role?: string;
 } | null;
 
 const Ctx = createContext<{
