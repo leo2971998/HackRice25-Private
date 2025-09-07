@@ -51,14 +51,22 @@ def ask():
     
     # Fallback to local AI processing with advanced agent if available
     try:
-        # First try the advanced AI agent
-        response = process_financial_query(question, user_context=data.get("context"))
+        # Extract user context and conversation history from request
+        user_context = data.get("context", {})
+        conversation_history = data.get("conversation_history", [])
+        
+        # Process with the advanced AI agent
+        response = process_financial_query(question, user_context=user_context, conversation_history=conversation_history)
         
         return jsonify({
             "answer": response["answer"],
             "sources": response["sources"],
             "provider": response.get("provider", "ai-agent"),
-            "agent_used": response.get("agent_used", False)
+            "agent_used": response.get("agent_used", False),
+            "action_items": response.get("action_items", []),
+            "priority_level": response.get("priority_level", "medium"),
+            "follow_up_questions": response.get("follow_up_questions", []),
+            "intent_classification": response.get("intent_classification", {})
         })
         
     except Exception as e:
