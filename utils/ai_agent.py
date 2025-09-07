@@ -278,7 +278,297 @@ class HoustonFinancialAgent:
         """
         return advice.strip()
     
-    def _clarify_intent(self, user_query: str) -> str:
+    def _build_enhanced_context(self, user_context: Optional[Dict] = None, conversation_history: Optional[List[Dict]] = None) -> Dict:
+        """Build enhanced context from user data and conversation history"""
+        enhanced_context = {
+            "user_location": "Harris County",  # Default to Harris County
+            "household_size": None,
+            "previous_assistance": [],
+            "urgency_level": "normal",
+            "location_verified": False,
+            "income_range": None,
+            "conversation_summary": ""
+        }
+        
+        # Add user context if provided
+        if user_context:
+            enhanced_context.update({
+                "user_location": user_context.get("location", "Harris County"),
+                "household_size": user_context.get("household_size"),
+                "previous_assistance": user_context.get("assistance_history", []),
+                "location_verified": user_context.get("location_verified", False),
+                "income_range": user_context.get("income_range")
+            })
+        
+        # Add conversation context if provided
+        if conversation_history:
+            enhanced_context["conversation_summary"] = self._build_conversation_context(conversation_history)
+            
+        return enhanced_context
+    
+    def _build_conversation_context(self, conversation_history: List[Dict]) -> str:
+        """Build context summary from previous interactions"""
+        if not conversation_history:
+            return ""
+        
+        context_parts = []
+        for interaction in conversation_history[-3:]:  # Last 3 interactions
+            if interaction.get("user_query"):
+                context_parts.append(f"User asked: {interaction['user_query']}")
+            if interaction.get("ai_response"):
+                # Summarize AI response to key points
+                response = interaction["ai_response"]
+                if len(response) > 100:
+                    response = response[:100] + "..."
+                context_parts.append(f"AI responded: {response}")
+        
+        return " | ".join(context_parts)
+    
+    def classify_intent(self, question: str) -> Dict:
+        """Classify user intent more sophisticatedly"""
+        question_lower = question.lower()
+        
+        intents = {
+            "urgent_assistance": {
+                "keywords": ["emergency", "eviction", "evicted", "shut off", "shutoff", "disconnect", "urgent", "immediately", "help now", "tomorrow", "today"],
+                "priority": "high"
+            },
+            "program_search": {
+                "keywords": ["help with", "assistance", "programs", "available", "find", "need help", "what programs", "options"],
+                "priority": "medium"
+            },
+            "application_help": {
+                "keywords": ["apply", "how to", "requirements", "documents", "process", "steps", "application"],
+                "priority": "medium"
+            },
+            "follow_up": {
+                "keywords": ["status", "application", "submitted", "waiting", "approved", "denied", "my application"],
+                "priority": "medium"
+            },
+            "budgeting_help": {
+                "keywords": ["budget", "budgeting", "money management", "financial planning", "expenses", "my budget"],
+                "priority": "low"
+            }
+        }
+        
+        detected_intents = []
+        for intent_name, intent_data in intents.items():
+            # Count keyword matches, including partial matches
+            matches = 0
+            for keyword in intent_data["keywords"]:
+                if keyword in question_lower:
+                    matches += 1
+                # Also check for word-level matches for better accuracy
+                for word in question_lower.split():
+                    if word in keyword.split():
+                        matches += 0.5
+            
+            if matches > 0:
+                confidence = min(matches / len(intent_data["keywords"]), 1.0)  # Cap at 1.0
+                detected_intents.append({
+                    "intent": intent_name,
+                    "confidence": confidence,
+                    "priority": intent_data["priority"]
+                })
+        
+        # Sort by confidence
+        detected_intents.sort(key=lambda x: x["confidence"], reverse=True)
+        
+        return {
+            "primary_intent": detected_intents[0] if detected_intents else {"intent": "general_inquiry", "confidence": 0.0, "priority": "low"},
+            "all_intents": detected_intents
+        }
+    
+    def format_response(self, raw_response: Dict, query: str, context: Dict) -> Dict:
+        """Format response with standardized structure"""
+        intent_analysis = self.classify_intent(query)
+        
+        formatted_response = {
+            "answer": raw_response.get("answer", ""),
+            "sources": raw_response.get("sources", []),
+            "provider": raw_response.get("provider", "unknown"),
+            "agent_used": raw_response.get("agent_used", False),
+            "action_items": self._extract_action_items(raw_response.get("answer", "")),
+            "priority_level": intent_analysis["primary_intent"]["priority"],
+            "follow_up_questions": self._generate_clarifying_questions(query, context),
+            "intent_classification": intent_analysis
+        }
+        
+        return formatted_response
+    
+    def _extract_action_items(self, answer: str) -> List[str]:
+        """Extract actionable next steps from the response"""
+        action_items = []
+        
+        # Look for numbered lists or bullet points
+        import re
+        
+        # Find numbered steps (1. 2. 3. etc.)
+        numbered_steps = re.findall(r'\d+\.\s*([^\n]+)', answer)
+        action_items.extend(numbered_steps)
+        
+        # Find bullet points (- or • )
+        bullet_points = re.findall(r'[-•]\s*([^\n]+)', answer)
+        action_items.extend(bullet_points)
+        
+        # If no structured actions found, create general ones
+        if not action_items:
+            if "contact" in answer.lower() or "call" in answer.lower():
+                action_items.append("Contact the recommended organizations directly")
+            if "apply" in answer.lower() or "application" in answer.lower():
+                action_items.append("Gather required documents for application")
+            if "eligibility" in answer.lower():
+                action_items.append("Check eligibility requirements")
+        
+        return action_items[:5]  # Limit to 5 action items
+    
+    def _generate_clarifying_questions(self, user_query: str, user_context: Dict = None) -> List[str]:
+        """Generate personalized clarifying questions"""
+        questions = []
+        
+        if not user_context:
+            user_context = {}
+        
+        query_lower = user_query.lower()
+        
+        # Location verification
+        if not user_context.get("location_verified"):
+            questions.append("Are you located in Harris County, Texas?")
+        
+        # Income-related questions for financial assistance
+        if any(keyword in query_lower for keyword in ["financial", "assistance", "help", "support"]) and not user_context.get("income_range"):
+            questions.append("What's your approximate monthly household income range?")
+        
+        # Household size for program eligibility
+        if not user_context.get("household_size") and any(keyword in query_lower for keyword in ["family", "household", "assistance"]):
+            questions.append("How many people are in your household?")
+        
+        # Urgency assessment
+        if any(keyword in query_lower for keyword in ["urgent", "emergency", "immediately", "eviction", "shut off"]):
+            questions.append("Do you have any specific deadlines or urgent situations?")
+        
+        # Previous assistance history
+        if not user_context.get("previous_assistance") and "assistance" in query_lower:
+            questions.append("Have you received financial assistance before?")
+        
+        # Specific type of help
+        if len(query_lower.split()) < 5:  # Short, vague queries
+            questions.append("What specific type of financial assistance do you need? (rent, utilities, food, etc.)")
+        
+        return questions[:3]  # Limit to avoid overwhelming
+    
+    def validate_response(self, response: Dict) -> Dict:
+        """Ensure response quality before returning"""
+        answer = response.get("answer", "")
+        
+        # Enhance short responses
+        if len(answer) < 50:
+            response["answer"] = self._enhance_short_response(answer, response.get("sources", []))
+        
+        # Ensure sources are provided
+        if not response.get("sources"):
+            response["sources"] = get_default_houston_sources()[:3]
+        
+        # Add next steps if missing actionable content
+        if not self._contains_actionable_steps(answer):
+            response["answer"] += "\n\n" + self._add_next_steps(response.get("intent_classification", {}))
+        
+        return response
+    
+    def _enhance_short_response(self, answer: str, sources: List[Dict]) -> str:
+        """Enhance short responses with additional helpful information"""
+        if not answer or len(answer.strip()) < 20:
+            answer = "I can help you find financial assistance resources in Houston/Harris County."
+        
+        enhanced = f"{answer}\n\nHere are some helpful resources:\n\n"
+        
+        for i, source in enumerate(sources[:2], 1):
+            enhanced += f"{i}. **{source.get('name', 'Program')}**: {source.get('why', 'Financial assistance')}\n"
+            if source.get('phone'):
+                enhanced += f"   Phone: {source['phone']}\n"
+            enhanced += "\n"
+        
+        return enhanced
+    
+    def _contains_actionable_steps(self, answer: str) -> bool:
+        """Check if response contains actionable steps"""
+        action_indicators = [
+            "contact", "call", "apply", "visit", "go to", "submit", 
+            "gather", "prepare", "check", "verify", "steps:", "next:"
+        ]
+        answer_lower = answer.lower()
+        return any(indicator in answer_lower for indicator in action_indicators)
+    
+    def _add_next_steps(self, intent_classification: Dict) -> str:
+        """Add general next steps based on intent"""
+        primary_intent = intent_classification.get("primary_intent", {}).get("intent", "general_inquiry")
+        
+        if primary_intent == "urgent_assistance":
+            return """**Immediate Next Steps:**
+1. Call 211 for emergency assistance referrals
+2. Contact Harris County Community Services at (832) 927-4400
+3. Visit your local community center for emergency resources"""
+        
+        elif primary_intent == "program_search":
+            return """**Next Steps:**
+1. Review the programs listed above and their eligibility requirements
+2. Contact the organizations directly using the phone numbers provided
+3. Gather required documentation (ID, income proof, utility bills)"""
+        
+        elif primary_intent == "application_help":
+            return """**Application Steps:**
+1. Check eligibility requirements for each program
+2. Gather required documents (ID, proof of income, utility bills)
+3. Contact the organizations to start the application process"""
+        
+        else:
+            return """**General Next Steps:**
+1. Contact the recommended organizations for more information
+2. Ask about eligibility requirements and application processes
+3. Prepare necessary documentation in advance"""
+    
+    def _handle_ai_failure(self, question: str, error: Exception) -> Dict:
+        """More intelligent error handling based on error type"""
+        error_str = str(error).lower()
+        
+        if "timeout" in error_str:
+            # Quick resource list for timeout errors
+            return {
+                "answer": "I'm experiencing slow response times. Here are some quick resources while I recover:",
+                "sources": get_default_houston_sources()[:3],
+                "provider": "timeout-fallback",
+                "action_items": ["Contact these organizations directly", "Try your request again in a few minutes"],
+                "priority_level": "medium"
+            }
+        elif "rate" in error_str and "limit" in error_str:
+            # Check for cached response
+            return self._get_cached_response_if_available(question)
+        else:
+            # Emergency contact info for other errors
+            return {
+                "answer": """I'm having technical difficulties right now. For immediate assistance, please contact:
+
+• **Harris County Community Services**: (832) 927-4400
+• **Houston 311**: (713) 837-0311
+• **211 Texas**: Dial 2-1-1 for emergency assistance referrals
+
+I apologize for the inconvenience and recommend trying again later.""",
+                "sources": get_default_houston_sources()[:2],
+                "provider": "emergency-fallback",
+                "action_items": ["Call the numbers above for immediate help", "Try again later"],
+                "priority_level": "high"
+            }
+    
+    def _get_cached_response_if_available(self, question: str) -> Dict:
+        """Provide cached or simplified response for rate limiting"""
+        # Simple implementation - could be enhanced with actual caching
+        return {
+            "answer": "I'm currently rate-limited but here are some general Houston financial assistance resources:",
+            "sources": get_default_houston_sources()[:3],
+            "provider": "rate-limit-fallback",
+            "action_items": ["Contact these organizations directly", "Try your specific question again later"],
+            "priority_level": "medium"
+        }
         """Ask clarifying questions to better understand user needs"""
         clarifying_questions = """
         To help you better, could you please clarify:
@@ -312,32 +602,45 @@ Always be empathetic, practical, and focused on actionable next steps.
 When recommending programs, include contact information when available.
 """
     
-    def process_query(self, query: str, user_context: Optional[Dict] = None) -> Dict[str, Any]:
+    def process_query(self, query: str, user_context: Optional[Dict] = None, conversation_history: Optional[List[Dict]] = None) -> Dict[str, Any]:
         """Process a user query using the agent or fallback to basic AI"""
         try:
+            # Build enhanced context from user data and conversation history
+            enhanced_context = self._build_enhanced_context(user_context, conversation_history)
+            
             if self.initialized and self.agent_executor:
-                # Use the advanced agent
+                # Use the advanced agent with enhanced context
                 logger.info("Processing query with LangChain agent")
-                response = self.agent_executor.invoke({"input": query})
+                agent_input = {
+                    "input": query,
+                    "context": enhanced_context
+                }
+                response = self.agent_executor.invoke(agent_input)
                 
-                return {
+                raw_response = {
                     "answer": response.get("output", ""),
                     "sources": self._extract_sources_from_response(response),
                     "provider": "langchain-agent",
                     "agent_used": True
                 }
             else:
-                # Fallback to existing Gemini AI
+                # Fallback to existing Gemini AI with enhanced context
                 logger.info("Falling back to basic Gemini AI")
-                return self._fallback_response(query, user_context)
+                raw_response = self._fallback_response(query, enhanced_context)
+            
+            # Apply response formatting and validation
+            formatted_response = self.format_response(raw_response, query, enhanced_context)
+            validated_response = self.validate_response(formatted_response)
+            
+            return validated_response
                 
         except Exception as e:
             logger.error(f"Error processing query with agent: {e}")
-            return self._fallback_response(query, user_context)
+            return self._handle_ai_failure(query, e)
     
     def _fallback_response(self, query: str, user_context: Optional[Dict] = None) -> Dict[str, Any]:
         """Fallback to existing AI implementation"""
-        response = generate_financial_assistance_response(query)
+        response = generate_financial_assistance_response(query, user_context=user_context)
         response["provider"] = "fallback-gemini"
         response["agent_used"] = False
         return response
@@ -356,7 +659,7 @@ def get_houston_agent() -> HoustonFinancialAgent:
 
 
 # Convenience function for external use
-def process_financial_query(query: str, user_context: Optional[Dict] = None) -> Dict[str, Any]:
+def process_financial_query(query: str, user_context: Optional[Dict] = None, conversation_history: Optional[List[Dict]] = None) -> Dict[str, Any]:
     """Process a financial assistance query using the AI agent"""
     agent = get_houston_agent()
-    return agent.process_query(query, user_context)
+    return agent.process_query(query, user_context, conversation_history)
