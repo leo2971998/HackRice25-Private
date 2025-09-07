@@ -329,6 +329,10 @@ class HoustonFinancialAgent:
         question_lower = question.lower()
         
         intents = {
+            "non_financial": {
+                "keywords": ["time", "date", "weather", "hello", "hi there", "good morning", "good afternoon", "how are you", "what's up", "what time", "current time", "clock", "day", "today's date"],
+                "priority": "low"
+            },
             "urgent_assistance": {
                 "keywords": ["emergency", "eviction", "evicted", "shut off", "shutoff", "disconnect", "urgent", "immediately", "help now", "tomorrow", "today"],
                 "priority": "high"
@@ -346,7 +350,7 @@ class HoustonFinancialAgent:
                 "priority": "medium"
             },
             "budgeting_help": {
-                "keywords": ["budget", "budgeting", "money management", "financial planning", "expenses", "my budget"],
+                "keywords": ["budget", "budgeting", "money management", "financial planning", "expenses", "my budget", "financial tips", "budget tips", "save money", "spending"],
                 "priority": "low"
             }
         }
