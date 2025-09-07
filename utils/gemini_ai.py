@@ -251,11 +251,69 @@ def get_default_houston_sources() -> List[Dict]:
 
 def generate_mock_response(question: str, user_context: Dict = None) -> Dict:
     """Generate mock response when Gemini is not available"""
+    from .ai_agent import HoustonFinancialAgent
+    
     question_lower = question.lower()
     sources = get_default_houston_sources()
     user_context = user_context or {}
     
-    # Enhanced intent-based responses
+    # Use intent classification to determine response type
+    agent = HoustonFinancialAgent()
+    intent_result = agent.classify_intent(question)
+    primary_intent = intent_result["primary_intent"]["intent"]
+    
+    # Handle non-financial queries
+    if primary_intent == "non_financial":
+        answer = """I'm a financial assistance chatbot focused on helping Houston residents find financial aid programs. I can't provide information about time, weather, or general topics.
+
+**I can help you with:**
+- Rental and housing assistance
+- Utility bill payment help
+- Food assistance programs  
+- Emergency financial aid
+- Budgeting and financial planning
+
+*How can I assist you with your financial needs today?*"""
+        return {
+            "answer": answer,
+            "sources": []
+        }
+    
+    # Handle budgeting help requests
+    elif primary_intent == "budgeting_help":
+        answer = f"""**Houston Financial Budgeting Tips & Resources:**
+
+**📊 Essential Budgeting Steps:**
+1. **Track your income and expenses** for at least one month
+2. **Use the 50/30/20 rule**: 50% needs, 30% wants, 20% savings/debt
+3. **Prioritize fixed expenses**: rent, utilities, insurance, minimum debt payments
+4. **Build an emergency fund** even if it's just $25/month to start
+
+**💡 Houston-Specific Money-Saving Tips:**
+- Use **Metro LIFT** programs for reduced transit costs if you qualify
+- Apply for **LIHEAP** (Low Income Home Energy Assistance) to reduce utility costs
+- Visit **Houston Food Bank** locations to reduce grocery expenses
+- Check **Harris County** property tax exemptions you might qualify for
+
+**🛠 Free Budgeting Resources:**
+- **United Way of Greater Houston** offers free financial counseling
+- **Harris County Community Services** provides financial education classes
+- **Houston Public Library** has free financial literacy workshops
+
+{_get_personalized_advice("budgeting", user_context)}
+
+**Next Steps:**
+1. Download a free budgeting app or use a simple spreadsheet
+2. Contact United Way at 211 for free financial counseling
+3. Look into assistance programs if your budget shows shortfalls"""
+        
+        relevant_sources = [s for s in sources if any(keyword in s['name'].lower() for keyword in ['community', 'counseling', 'assistance'])][:3]
+        return {
+            "answer": answer,
+            "sources": relevant_sources
+        }
+    
+    # Enhanced intent-based responses for financial assistance
     if "rent" in question_lower or "housing" in question_lower:
         answer = f"""I found several **rental assistance programs** in Houston/Harris County:
 
@@ -327,6 +385,21 @@ The **Houston Food Bank** is the largest food distribution organization in the a
 def _get_personalized_advice(assistance_type: str, user_context: Dict) -> str:
     """Generate personalized advice based on user context"""
     advice_parts = []
+    
+    # Budgeting-specific advice
+    if assistance_type == "budgeting":
+        household_size = user_context.get("household_size")
+        if household_size:
+            if int(household_size) > 4:
+                advice_parts.append(f"💡 **Large household budget tip**: With {household_size} people, consider bulk buying and meal planning to save 15-20% on groceries.")
+            elif int(household_size) == 1:
+                advice_parts.append("💡 **Single person budget tip**: Focus on preventing lifestyle inflation and automate savings even if small amounts.")
+        
+        income_range = user_context.get("income_range")
+        if income_range and "low" in income_range.lower():
+            advice_parts.append("✅ **Low income budgeting**: Prioritize basic needs and look into assistance programs to free up money for savings.")
+        
+        return "\n".join(advice_parts) if advice_parts else ""
     
     # Urgency-based advice
     if user_context.get("urgency_level") == "high":
