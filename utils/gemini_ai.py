@@ -1,7 +1,10 @@
 # utils/gemini_ai.py
 import os
-import google.generativeai as genai
+import json
 from typing import List, Dict
+
+import google.generativeai as genai
+import numpy as np
 
 def configure_gemini():
     """Configure Gemini AI with API key"""
@@ -35,16 +38,11 @@ def test_gemini_connection():
         return False, f"Gemini connection failed: {str(e)}"
 
 def generate_financial_assistance_response(question: str, houston_data: List[Dict] = None, user_context: Dict = None) -> Dict:
-    """
-    Generate AI response for financial assistance questions using Gemini
-    
-    Args:
-        question: User's question about financial assistance
-        houston_data: Optional list of Houston financial assistance programs
-        user_context: Optional user context including location, household size, etc.
-    
-    Returns:
-        Dict with 'answer' and 'sources' keys
+    """Generate AI response for financial assistance questions using Gemini.
+
+    Returns a dictionary containing both a plain text summary (``answer``) for
+    backward compatibility and a ``structured`` field with rich data for the UI
+    (title, summary and actionable steps).
     """
     try:
         if not configure_gemini():
@@ -57,9 +55,9 @@ def generate_financial_assistance_response(question: str, houston_data: List[Dic
         # Build enhanced user context
         user_context_str = build_user_context_string(user_context or {})
         
-        # Create the enhanced prompt
+        # Create the enhanced prompt expecting JSON output
         prompt = f"""
-You are a helpful financial assistant specializing in Houston/Harris County financial assistance programs. 
+You are a helpful financial assistant specializing in Houston/Harris County financial assistance programs.
 
 Context about available programs:
 {context}
@@ -69,25 +67,45 @@ User Context:
 
 User Question: {question}
 
-Please provide a helpful, accurate response about financial assistance programs in Houston/Harris County. 
-If you recommend specific programs, make sure they are from the Houston/Harris County area.
-Keep your response concise but informative.
-
-Consider the user's context when making recommendations and be specific about next steps.
-Format your response focusing on practical help and actionable next steps.
+Respond ONLY in valid JSON with the following structure:
+{{
+  "title": "short response title",
+  "summary": "3-5 sentence summary with actionable tone",
+  "actionable_steps": ["short imperative step", "additional step"],
+  "sources": []
+}}
+Do not add any additional text outside the JSON.
 """
 
         model = genai.GenerativeModel('gemini-pro')
         response = model.generate_content(prompt)
-        
+
         if response and response.text:
-            # Parse the AI response and combine with local data sources
-            ai_answer = response.text.strip()
-            sources = extract_relevant_sources(question, houston_data or get_default_houston_sources())
-            
+            raw_text = response.text.strip()
+            try:
+                parsed = json.loads(raw_text)
+            except json.JSONDecodeError:
+                parsed = {
+                    "title": "Financial Assistance Information",
+                    "summary": raw_text,
+                    "actionable_steps": [],
+                    "sources": []
+                }
+
+            sources = extract_relevant_sources(
+                question, houston_data or get_default_houston_sources()
+            )
+            structured = {
+                "title": parsed.get("title", ""),
+                "summary": parsed.get("summary", raw_text),
+                "actionable_steps": parsed.get("actionable_steps", []),
+                "sources": sources,
+            }
+
             return {
-                "answer": ai_answer,
-                "sources": sources
+                "answer": structured["summary"],
+                "structured": structured,
+                "sources": sources,
             }
         else:
             return generate_mock_response(question, user_context)
@@ -134,33 +152,54 @@ def build_user_context_string(user_context: Dict) -> str:
     return "\n".join(context_parts)
 
 def extract_relevant_sources(question: str, all_sources: List[Dict]) -> List[Dict]:
-    """Extract sources relevant to the user's question"""
-    question_lower = question.lower()
-    relevant_sources = []
-    
-    # Simple keyword matching for now - in production, this could use embeddings
-    for source in all_sources:
-        source_text = f"{source.get('name', '')} {source.get('why', '')}".lower()
-        
-        # Check for relevant keywords
-        if any(keyword in question_lower for keyword in ['rent', 'housing']) and \
-           any(keyword in source_text for keyword in ['rent', 'housing', 'shelter']):
-            relevant_sources.append(source)
-        elif any(keyword in question_lower for keyword in ['utility', 'electric', 'water', 'gas']) and \
-             any(keyword in source_text for keyword in ['utility', 'electric', 'water', 'gas', 'bill']):
-            relevant_sources.append(source)
-        elif any(keyword in question_lower for keyword in ['food', 'snap', 'hungry']) and \
-             any(keyword in source_text for keyword in ['food', 'snap', 'meal', 'nutrition']):
-            relevant_sources.append(source)
-        elif any(keyword in question_lower for keyword in ['home', 'buy', 'purchase', 'mortgage']) and \
-             any(keyword in source_text for keyword in ['home', 'buy', 'mortgage', 'purchase']):
-            relevant_sources.append(source)
-    
-    # If no specific matches, return a few general ones
-    if not relevant_sources:
-        relevant_sources = all_sources[:3]
-    
-    return relevant_sources[:5]  # Limit to 5 sources
+    """Extract sources relevant to the user's question using semantic search."""
+    try:
+        query_embedding = genai.embed_content(
+            model="models/embedding-001", content=question
+        )["embedding"]
+
+        source_embeddings = []
+        for src in all_sources:
+            text = f"{src.get('name', '')} {src.get('why', '')}"
+            embedding = genai.embed_content(
+                model="models/embedding-001", content=text
+            )["embedding"]
+            source_embeddings.append(embedding)
+
+        similarities = []
+        q = np.array(query_embedding)
+        q_norm = np.linalg.norm(q)
+        for emb, src in zip(source_embeddings, all_sources):
+            e = np.array(emb)
+            sim = float(np.dot(q, e) / (q_norm * np.linalg.norm(e)))
+            similarities.append((sim, src))
+
+        similarities.sort(key=lambda x: x[0], reverse=True)
+        ranked = [s for _, s in similarities]
+        return ranked[:5]
+    except Exception:
+        # Fallback to simple keyword matching
+        question_lower = question.lower()
+        relevant_sources = []
+
+        for source in all_sources:
+            source_text = f"{source.get('name', '')} {source.get('why', '')}".lower()
+            if any(k in question_lower for k in ['rent', 'housing']) and \
+               any(k in source_text for k in ['rent', 'housing', 'shelter']):
+                relevant_sources.append(source)
+            elif any(k in question_lower for k in ['utility', 'electric', 'water', 'gas']) and \
+                 any(k in source_text for k in ['utility', 'electric', 'water', 'gas', 'bill']):
+                relevant_sources.append(source)
+            elif any(k in question_lower for k in ['food', 'snap', 'hungry']) and \
+                 any(k in source_text for k in ['food', 'snap', 'meal', 'nutrition']):
+                relevant_sources.append(source)
+            elif any(k in question_lower for k in ['home', 'buy', 'purchase', 'mortgage']) and \
+                 any(k in source_text for k in ['home', 'buy', 'mortgage', 'purchase']):
+                relevant_sources.append(source)
+
+        if not relevant_sources:
+            relevant_sources = all_sources[:3]
+        return relevant_sources[:5]
 
 def get_default_houston_sources() -> List[Dict]:
     """Get default Houston financial assistance sources"""
@@ -269,13 +308,20 @@ def generate_mock_response(question: str, user_context: Dict = None) -> Dict:
 **I can help you with:**
 - Rental and housing assistance
 - Utility bill payment help
-- Food assistance programs  
+- Food assistance programs
 - Emergency financial aid
 - Budgeting and financial planning
 
 *How can I assist you with your financial needs today?*"""
+        structured = {
+            "title": "Financial Assistance Focus",
+            "summary": answer,
+            "actionable_steps": [],
+            "sources": []
+        }
         return {
-            "answer": answer,
+            "answer": structured["summary"],
+            "structured": structured,
             "sources": []
         }
     
@@ -308,8 +354,15 @@ def generate_mock_response(question: str, user_context: Dict = None) -> Dict:
 3. Look into assistance programs if your budget shows shortfalls"""
         
         relevant_sources = [s for s in sources if any(keyword in s['name'].lower() for keyword in ['community', 'counseling', 'assistance'])][:3]
+        structured = {
+            "title": "Budgeting Help",
+            "summary": answer,
+            "actionable_steps": [],
+            "sources": relevant_sources
+        }
         return {
-            "answer": answer,
+            "answer": structured["summary"],
+            "structured": structured,
             "sources": relevant_sources
         }
     
@@ -376,9 +429,16 @@ The **Houston Food Bank** is the largest food distribution organization in the a
 **To get more specific help:**
 *Could you be more specific about what type of assistance you need?*"""
         relevant_sources = sources[:3]
-    
+
+    structured = {
+        "title": "Financial Assistance Information",
+        "summary": answer,
+        "actionable_steps": [],
+        "sources": relevant_sources
+    }
     return {
-        "answer": answer,
+        "answer": structured["summary"],
+        "structured": structured,
         "sources": relevant_sources
     }
 
