@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 # Import LangChain components with fallback
 try:
     from langchain.agents import AgentExecutor, create_openai_tools_agent
+    from langchain.prompts import ChatPromptTemplate
     from langchain.tools import Tool
     from langchain.memory import ConversationBufferMemory
     from langchain.schema import BaseMessage
@@ -330,7 +331,7 @@ class HoustonFinancialAgent:
         
         intents = {
             "non_financial": {
-                "keywords": ["time", "date", "weather", "hello", "hi there", "good morning", "good afternoon", "how are you", "what's up", "what time", "current time", "clock", "day", "today's date"],
+                "keywords": ["time", "date", "weather", "hello", "hi", "hi there", "good morning", "good afternoon", "how are you", "what's up", "what time", "current time", "clock", "day", "today's date"],
                 "priority": "low"
             },
             "urgent_assistance": {
@@ -598,24 +599,30 @@ I apologize for the inconvenience and recommend trying again later.""",
             formatted += f"{idx}. {q}\n"
         return formatted.strip()
     
-    def _get_agent_prompt(self) -> str:
-        """Get the system prompt for the agent"""
-        return """You are a helpful AI assistant specializing in Houston/Harris County financial assistance programs.
+    def _get_agent_prompt(self) -> "ChatPromptTemplate":
+        """Return a chat prompt template for the tools agent"""
+        system_msg = (
+            "You are a helpful AI assistant specializing in Houston/Harris County financial assistance programs.\n\n"
+            "Your role is to:\n"
+            "1. Help users find relevant financial assistance programs\n"
+            "2. Provide budgeting advice and financial planning guidance\n"
+            "3. Ask clarifying questions when needed to better understand user needs\n"
+            "4. Connect users with appropriate local resources\n\n"
+            "You have access to tools for:\n"
+            "- Searching Houston financial assistance programs\n"
+            "- Providing budgeting advice\n"
+            "- Clarifying user intent\n\n"
+            "Always be empathetic, practical, and focused on actionable next steps.\n"
+            "When recommending programs, include contact information when available."
+        )
 
-Your role is to:
-1. Help users find relevant financial assistance programs
-2. Provide budgeting advice and financial planning guidance  
-3. Ask clarifying questions when needed to better understand user needs
-4. Connect users with appropriate local resources
-
-You have access to tools for:
-- Searching Houston financial assistance programs
-- Providing budgeting advice
-- Clarifying user intent
-
-Always be empathetic, practical, and focused on actionable next steps. 
-When recommending programs, include contact information when available.
-"""
+        return ChatPromptTemplate.from_messages(
+            [
+                ("system", system_msg),
+                ("human", "{input}"),
+                ("ai", "{agent_scratchpad}"),
+            ]
+        )
     
     def process_query(self, query: str, user_context: Optional[Dict] = None, conversation_history: Optional[List[Dict]] = None) -> Dict[str, Any]:
         """Process a user query using the agent or fallback to basic AI"""

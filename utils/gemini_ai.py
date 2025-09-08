@@ -37,6 +37,46 @@ def test_gemini_connection():
     except Exception as e:
         return False, f"Gemini connection failed: {str(e)}"
 
+
+def build_user_context_string(user_context: Dict) -> str:
+    """Build user context string for prompts"""
+    context_parts = []
+
+    if user_context.get("user_location"):
+        context_parts.append(f"Location: {user_context['user_location']}")
+
+    if user_context.get("household_size"):
+        context_parts.append(f"Household size: {user_context['household_size']}")
+
+    if user_context.get("income_range"):
+        context_parts.append(f"Income range: {user_context['income_range']}")
+
+    if user_context.get("urgency_level"):
+        context_parts.append(f"Urgency level: {user_context['urgency_level']}")
+
+    if user_context.get("previous_assistance"):
+        context_parts.append(f"Previous assistance: {', '.join(user_context['previous_assistance'])}")
+
+    if user_context.get("conversation_summary"):
+        context_parts.append(f"Previous conversation: {user_context['conversation_summary']}")
+
+    return "; ".join(context_parts) if context_parts else "No specific user context provided"
+
+
+def build_houston_context(houston_data: List[Dict]) -> str:
+    """Build context string from Houston assistance program data"""
+    if not houston_data:
+        houston_data = get_default_houston_sources()
+
+    context_parts = []
+    for program in houston_data:
+        context_part = f"- {program.get('name', 'Unknown Program')}: {program.get('why', 'Financial assistance program')}"
+        if program.get('eligibility'):
+            context_part += f" (Eligibility: {program['eligibility']})"
+        context_parts.append(context_part)
+
+    return "\n".join(context_parts)
+
 def generate_financial_assistance_response(question: str, houston_data: List[Dict] = None, user_context: Dict = None) -> Dict:
     """Generate AI response for financial assistance questions using Gemini.
 
@@ -128,44 +168,6 @@ Do not add any additional text outside the JSON.
         # Fallback to mock response on error
         return generate_mock_response(question, user_context)
 
-def build_user_context_string(user_context: Dict) -> str:
-    """Build user context string for prompts"""
-    context_parts = []
-    
-    if user_context.get("user_location"):
-        context_parts.append(f"Location: {user_context['user_location']}")
-    
-    if user_context.get("household_size"):
-        context_parts.append(f"Household size: {user_context['household_size']}")
-    
-    if user_context.get("income_range"):
-        context_parts.append(f"Income range: {user_context['income_range']}")
-    
-    if user_context.get("urgency_level"):
-        context_parts.append(f"Urgency level: {user_context['urgency_level']}")
-    
-    if user_context.get("previous_assistance"):
-        context_parts.append(f"Previous assistance: {', '.join(user_context['previous_assistance'])}")
-    
-    if user_context.get("conversation_summary"):
-        context_parts.append(f"Previous conversation: {user_context['conversation_summary']}")
-
-    return "; ".join(context_parts) if context_parts else "No specific user context provided"
-
-
-def build_houston_context(houston_data: List[Dict]) -> str:
-    """Build context string from Houston assistance program data"""
-    if not houston_data:
-        houston_data = get_default_houston_sources()
-
-    context_parts = []
-    for program in houston_data:
-        context_part = f"- {program.get('name', 'Unknown Program')}: {program.get('why', 'Financial assistance program')}"
-        if program.get('eligibility'):
-            context_part += f" (Eligibility: {program['eligibility']})"
-        context_parts.append(context_part)
-
-    return "\n".join(context_parts)
 
 def extract_relevant_sources(question: str, all_sources: List[Dict]) -> List[Dict]:
     """Extract sources relevant to the user's question using semantic search."""
@@ -319,16 +321,17 @@ def generate_mock_response(question: str, user_context: Dict = None) -> Dict:
     
     # Handle non-financial queries
     if primary_intent == "non_financial":
-        answer = """I'm a financial assistance chatbot focused on helping Houston residents find financial aid programs. I can't provide information about time, weather, or general topics.
-
-**I can help you with:**
-- Rental and housing assistance
-- Utility bill payment help
-- Food assistance programs
-- Emergency financial aid
-- Budgeting and financial planning
-
-*How can I assist you with your financial needs today?*"""
+        answer = (
+            "Hi there! I'm a friendly financial assistance chatbot for Houston and Harris County residents. "
+            "I can’t help with general topics like time or weather, but I’d love to assist you with money matters.\n\n"
+            "**I can help you with:**\n"
+            "- Rental and housing assistance\n"
+            "- Utility bill payment help\n"
+            "- Food assistance programs\n"
+            "- Emergency financial aid\n"
+            "- Budgeting and financial planning\n\n"
+            "*What kind of financial help do you need today?*"
+        )
         structured = {
             "title": "Financial Assistance Focus",
             "summary": answer,
