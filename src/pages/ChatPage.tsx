@@ -22,7 +22,7 @@ export default function ChatPage() {
     setLoading(true);
     try {
       const data = await ask(q);
-      setMessages((m) => [...m, { role: "bot", content: data.answer, sources: data.sources as Source[] }]);
+      setMessages((m) => [...m, { role: "bot", content: data.summary, sources: data.sources as Source[] }]);
     } catch (e: any) {
       toast.error(e?.message || "Request failed");
       setMessages((m) => [...m, { role: "bot", content: `Sorry, something went wrong: ${e?.message || "error"}` }]);
