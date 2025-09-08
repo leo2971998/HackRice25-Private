@@ -26,7 +26,7 @@ def test_gemini_connection():
         if not configure_gemini():
             return False, "Gemini API key not configured"
         
-        model = genai.GenerativeModel('gemini-pro')
+        model = genai.GenerativeModel('gemini-1.5-pro-latest')
         response = model.generate_content("Hello, this is a test. Please respond with 'Connection successful'.")
         
         if response and response.text:
@@ -60,7 +60,6 @@ def generate_financial_assistance_response(question: str, houston_data: List[Dic
 
         # Build enhanced user context
         user_context_str = build_user_context_string(user_context or {})
-
         # Create the enhanced prompt expecting JSON output
         prompt = f"""
 You are a helpful financial assistant specializing in Houston/Harris County financial assistance programs.
