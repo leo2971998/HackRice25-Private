@@ -48,7 +48,14 @@ def generate_financial_assistance_response(question: str, houston_data: List[Dic
         if not configure_gemini():
             # Fallback to mock response if Gemini not available
             return generate_mock_response(question, user_context)
-        
+
+        # Handle non-financial queries without calling the API
+        from .ai_agent import HoustonFinancialAgent
+        agent = HoustonFinancialAgent()
+        intent = agent.classify_intent(question)["primary_intent"]["intent"]
+        if intent == "non_financial":
+            return generate_mock_response(question, user_context)
+
         # Build context with Houston financial assistance data
         context = build_houston_context(houston_data)
         
@@ -136,19 +143,22 @@ def build_user_context_string(user_context: Dict) -> str:
     
     if user_context.get("conversation_summary"):
         context_parts.append(f"Previous conversation: {user_context['conversation_summary']}")
-    
+
     return "; ".join(context_parts) if context_parts else "No specific user context provided"
+
+
+def build_houston_context(houston_data: List[Dict]) -> str:
     """Build context string from Houston assistance program data"""
     if not houston_data:
         houston_data = get_default_houston_sources()
-    
+
     context_parts = []
     for program in houston_data:
         context_part = f"- {program.get('name', 'Unknown Program')}: {program.get('why', 'Financial assistance program')}"
         if program.get('eligibility'):
             context_part += f" (Eligibility: {program['eligibility']})"
         context_parts.append(context_part)
-    
+
     return "\n".join(context_parts)
 
 def extract_relevant_sources(question: str, all_sources: List[Dict]) -> List[Dict]:

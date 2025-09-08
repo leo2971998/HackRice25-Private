@@ -580,19 +580,17 @@ I apologize for the inconvenience and recommend trying again later.""",
             "action_items": ["Contact these organizations directly", "Try your specific question again later"],
             "priority_level": "medium"
         }
+
+    def _clarify_intent(self, question: str) -> str:
         """Ask clarifying questions to better understand user needs"""
-        clarifying_questions = """
-        To help you better, could you please clarify:
-        
-        1. What specific type of financial assistance do you need? (rent, utilities, food, etc.)
-        2. Are you a Harris County resident?
-        3. What's your current household size?
-        4. Do you have any specific urgent deadlines or situations?
-        5. Have you applied for assistance programs before?
-        
-        The more details you can provide, the better I can help you find the right resources.
-        """
-        return clarifying_questions.strip()
+        questions = self._generate_clarifying_questions(question)
+        if not questions:
+            return "Could you provide more details about your financial assistance needs?"
+
+        formatted = "To help you better, could you please clarify:\n\n"
+        for idx, q in enumerate(questions, 1):
+            formatted += f"{idx}. {q}\n"
+        return formatted.strip()
     
     def _get_agent_prompt(self) -> str:
         """Get the system prompt for the agent"""
