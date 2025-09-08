@@ -6,6 +6,7 @@ Implements LangChain-based agent with tools and semantic search
 
 import os
 import logging
+import json
 from typing import List, Dict, Optional, Any
 from functools import lru_cache
 
@@ -81,7 +82,8 @@ class HoustonFinancialAgent:
             llm = ChatGoogleGenerativeAI(
                 model="gemini-1.5-pro-latest",
                 google_api_key=api_key,
-                temperature=0.3
+                temperature=0.3,
+                convert_system_message_to_human=True
             )
             
             # Initialize memory
@@ -633,9 +635,11 @@ I apologize for the inconvenience and recommend trying again later.""",
             if self.initialized and self.agent_executor:
                 # Use the advanced agent with enhanced context
                 logger.info("Processing query with LangChain agent")
+                context_str = json.dumps(
+                    {k: v for k, v in enhanced_context.items() if v not in (None, "", [], {})}
+                )
                 agent_input = {
-                    "input": query,
-                    "context": enhanced_context
+                    "input": f"{query}\n\nContext: {context_str}"
                 }
                 response = self.agent_executor.invoke(agent_input)
                 
