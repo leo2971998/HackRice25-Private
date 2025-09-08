@@ -37,8 +37,10 @@ def ask():
             if response.status_code == 200:
                 ai_response = response.json()
                 return jsonify({
-                    "answer": ai_response["answer"],
-                    "sources": ai_response["sources"],
+                    "title": ai_response.get("title", ""),
+                    "summary": ai_response.get("summary", ai_response.get("answer", "")),
+                    "actionable_steps": ai_response.get("actionable_steps", []),
+                    "sources": ai_response.get("sources", []),
                     "provider": "ai-microservice"
                 })
             else:
@@ -56,14 +58,19 @@ def ask():
         conversation_history = data.get("conversation_history", [])
         
         # Process with the advanced AI agent
-        response = process_financial_query(question, user_context=user_context, conversation_history=conversation_history)
-        
+        response = process_financial_query(
+            question,
+            user_context=user_context,
+            conversation_history=conversation_history,
+        )
+
         return jsonify({
-            "answer": response["answer"],
-            "sources": response["sources"],
+            "title": response.get("title", ""),
+            "summary": response.get("summary", response.get("answer", "")),
+            "actionable_steps": response.get("actionable_steps", []),
+            "sources": response.get("sources", []),
             "provider": response.get("provider", "ai-agent"),
             "agent_used": response.get("agent_used", False),
-            "action_items": response.get("action_items", []),
             "priority_level": response.get("priority_level", "medium"),
             "follow_up_questions": response.get("follow_up_questions", []),
             "intent_classification": response.get("intent_classification", {})
@@ -73,7 +80,9 @@ def ask():
         # Final fallback to a generic error response
         print(f"Error in chat endpoint: {e}")
         return jsonify({
-            "answer": "I'm sorry, I'm having trouble processing your request right now. Please try again later or contact Houston/Harris County services directly for assistance.",
+            "title": "Service Unavailable",
+            "summary": "I'm sorry, I'm having trouble processing your request right now. Please try again later or contact Houston/Harris County services directly for assistance.",
+            "actionable_steps": [],
             "sources": [],
             "provider": "fallback"
         }), 500
