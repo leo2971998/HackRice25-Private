@@ -10,5 +10,5 @@ export const api = axios.create({
 
 export async function ask(question: string) {
   const { data } = await api.post("/ask", { question });
-  return data as { answer: string; sources: any[] };
+  return data as { summary: string; sources: any[] };
 }
