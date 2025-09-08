@@ -81,7 +81,8 @@ class HoustonFinancialAgent:
             llm = ChatGoogleGenerativeAI(
                 model="gemini-1.5-pro-latest",
                 google_api_key=api_key,
-                temperature=0.3
+                temperature=0.3,
+                convert_system_message_to_human=True
             )
             
             # Initialize memory
