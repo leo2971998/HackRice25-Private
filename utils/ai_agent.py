@@ -79,7 +79,7 @@ class HoustonFinancialAgent:
             
             # Initialize LLM
             llm = ChatGoogleGenerativeAI(
-                model="gemini-pro",
+                model="gemini-1.5-pro-latest",
                 google_api_key=api_key,
                 temperature=0.3
             )
