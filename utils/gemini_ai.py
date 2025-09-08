@@ -87,24 +87,37 @@ Do not add any additional text outside the JSON.
 
         if response and response.text:
             raw_text = response.text.strip()
+
+            # --- robust JSON parsing ---
+            json_start = raw_text.find('{')
+            json_end = raw_text.rfind('}')
+            if json_start != -1 and json_end != -1:
+                json_str = raw_text[json_start:json_end + 1]
+            else:
+                json_str = ""
+
             try:
-                parsed = json.loads(raw_text)
+                parsed = json.loads(json_str) if json_str else {}
+                if not parsed:
+                    raise json.JSONDecodeError("No JSON found", "", 0)
             except json.JSONDecodeError:
-                parsed = {
-                    "title": "Financial Assistance Information",
-                    "summary": raw_text,
-                    "actionable_steps": [],
-                    "sources": []
-                }
+                print(f"Failed to parse Gemini JSON response: {raw_text}")
+                return generate_mock_response(question, user_context)
 
             sources = extract_relevant_sources(
                 question, houston_data or get_default_houston_sources()
             )
 
-            return {
+            structured = {
                 "title": parsed.get("title", ""),
-                "summary": parsed.get("summary", raw_text),
+                "summary": parsed.get("summary", "I found some information for you."),
                 "actionable_steps": parsed.get("actionable_steps", []),
+                "sources": sources,
+            }
+
+            return {
+                "answer": structured["summary"],
+                "structured": structured,
                 "sources": sources,
             }
         else:
