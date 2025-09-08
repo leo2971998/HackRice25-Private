@@ -35,7 +35,7 @@ def create_app():
             
             return jsonify({
                 "title": response.get("title", ""),
-                "summary": response.get("summary", response.get("answer", "")),
+                "summary": response.get("summary", ""),
                 "actionable_steps": response.get("actionable_steps", []),
                 "sources": response.get("sources", []),
                 "service": "ai-chatbot",

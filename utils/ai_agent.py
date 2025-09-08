@@ -387,12 +387,18 @@ class HoustonFinancialAgent:
         """Format response with standardized structure"""
         intent_analysis = self.classify_intent(query)
         structured = raw_response.get("structured", {})
-        summary_text = structured.get("summary", raw_response.get("answer", ""))
-        steps = structured.get("actionable_steps") or self._extract_action_items(summary_text)
+        summary_text = raw_response.get(
+            "summary",
+            structured.get("summary", raw_response.get("answer", ""))
+        )
+        steps = raw_response.get(
+            "actionable_steps",
+            structured.get("actionable_steps")
+        ) or self._extract_action_items(summary_text)
 
         formatted_response = {
             "answer": summary_text,
-            "title": structured.get("title", ""),
+            "title": raw_response.get("title", structured.get("title", "")),
             "summary": summary_text,
             "actionable_steps": steps,
             "action_items": steps,

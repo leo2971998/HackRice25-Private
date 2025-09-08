@@ -38,7 +38,7 @@ def ask():
                 ai_response = response.json()
                 return jsonify({
                     "title": ai_response.get("title", ""),
-                    "summary": ai_response.get("summary", ai_response.get("answer", "")),
+                    "summary": ai_response.get("summary", ""),
                     "actionable_steps": ai_response.get("actionable_steps", []),
                     "sources": ai_response.get("sources", []),
                     "provider": "ai-microservice"
@@ -66,7 +66,7 @@ def ask():
 
         return jsonify({
             "title": response.get("title", ""),
-            "summary": response.get("summary", response.get("answer", "")),
+            "summary": response.get("summary", ""),
             "actionable_steps": response.get("actionable_steps", []),
             "sources": response.get("sources", []),
             "provider": response.get("provider", "ai-agent"),

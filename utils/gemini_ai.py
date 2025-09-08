@@ -40,9 +40,8 @@ def test_gemini_connection():
 def generate_financial_assistance_response(question: str, houston_data: List[Dict] = None, user_context: Dict = None) -> Dict:
     """Generate AI response for financial assistance questions using Gemini.
 
-    Returns a dictionary containing both a plain text summary (``answer``) for
-    backward compatibility and a ``structured`` field with rich data for the UI
-    (title, summary and actionable steps).
+    Returns a dictionary containing a structured response with a title, summary,
+    actionable steps, and sources.
     """
     try:
         if not configure_gemini():
@@ -58,10 +57,9 @@ def generate_financial_assistance_response(question: str, houston_data: List[Dic
 
         # Build context with Houston financial assistance data
         context = build_houston_context(houston_data)
-        
+
         # Build enhanced user context
         user_context_str = build_user_context_string(user_context or {})
-        
         # Create the enhanced prompt expecting JSON output
         prompt = f"""
 You are a helpful financial assistant specializing in Houston/Harris County financial assistance programs.
@@ -102,21 +100,16 @@ Do not add any additional text outside the JSON.
             sources = extract_relevant_sources(
                 question, houston_data or get_default_houston_sources()
             )
-            structured = {
+
+            return {
                 "title": parsed.get("title", ""),
                 "summary": parsed.get("summary", raw_text),
                 "actionable_steps": parsed.get("actionable_steps", []),
                 "sources": sources,
             }
-
-            return {
-                "answer": structured["summary"],
-                "structured": structured,
-                "sources": sources,
-            }
         else:
             return generate_mock_response(question, user_context)
-            
+
     except Exception as e:
         print(f"Error generating Gemini response: {e}")
         # Fallback to mock response on error
