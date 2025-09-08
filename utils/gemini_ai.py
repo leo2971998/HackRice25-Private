@@ -26,7 +26,7 @@ def test_gemini_connection():
         if not configure_gemini():
             return False, "Gemini API key not configured"
         
-        model = genai.GenerativeModel('gemini-pro')
+        model = genai.GenerativeModel('gemini-1.5-pro-latest')
         response = model.generate_content("Hello, this is a test. Please respond with 'Connection successful'.")
         
         if response and response.text:
@@ -84,7 +84,7 @@ Respond ONLY in valid JSON with the following structure:
 Do not add any additional text outside the JSON.
 """
 
-        model = genai.GenerativeModel('gemini-pro')
+        model = genai.GenerativeModel('gemini-1.5-pro-latest')
         response = model.generate_content(prompt)
 
         if response and response.text:
