@@ -34,8 +34,10 @@ def create_app():
             response = process_financial_query(question, user_context=data.get("context"))
             
             return jsonify({
-                "answer": response["answer"],
-                "sources": response["sources"],
+                "title": response.get("title", ""),
+                "summary": response.get("summary", ""),
+                "actionable_steps": response.get("actionable_steps", []),
+                "sources": response.get("sources", []),
                 "service": "ai-chatbot",
                 "provider": response.get("provider", "ai-agent"),
                 "agent_used": response.get("agent_used", False)

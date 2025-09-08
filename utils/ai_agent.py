@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 # Import LangChain components with fallback
 try:
     from langchain.agents import AgentExecutor, create_openai_tools_agent
+    from langchain.prompts import ChatPromptTemplate
     from langchain.tools import Tool
     from langchain.memory import ConversationBufferMemory
     from langchain.schema import BaseMessage
@@ -330,7 +331,7 @@ class HoustonFinancialAgent:
         
         intents = {
             "non_financial": {
-                "keywords": ["time", "date", "weather", "hello", "hi there", "good morning", "good afternoon", "how are you", "what's up", "what time", "current time", "clock", "day", "today's date"],
+                "keywords": ["time", "date", "weather", "hello", "hi", "hi there", "good morning", "good afternoon", "how are you", "what's up", "what time", "current time", "clock", "day", "today's date"],
                 "priority": "low"
             },
             "urgent_assistance": {
@@ -386,18 +387,30 @@ class HoustonFinancialAgent:
     def format_response(self, raw_response: Dict, query: str, context: Dict) -> Dict:
         """Format response with standardized structure"""
         intent_analysis = self.classify_intent(query)
-        
+        structured = raw_response.get("structured", {})
+        summary_text = raw_response.get(
+            "summary",
+            structured.get("summary", raw_response.get("answer", ""))
+        )
+        steps = raw_response.get(
+            "actionable_steps",
+            structured.get("actionable_steps")
+        ) or self._extract_action_items(summary_text)
+
         formatted_response = {
-            "answer": raw_response.get("answer", ""),
-            "sources": raw_response.get("sources", []),
+            "answer": summary_text,
+            "title": raw_response.get("title", structured.get("title", "")),
+            "summary": summary_text,
+            "actionable_steps": steps,
+            "action_items": steps,
+            "sources": raw_response.get("sources", structured.get("sources", [])),
             "provider": raw_response.get("provider", "unknown"),
             "agent_used": raw_response.get("agent_used", False),
-            "action_items": self._extract_action_items(raw_response.get("answer", "")),
             "priority_level": intent_analysis["primary_intent"]["priority"],
             "follow_up_questions": self._generate_clarifying_questions(query, context),
             "intent_classification": intent_analysis
         }
-        
+
         return formatted_response
     
     def _extract_action_items(self, answer: str) -> List[str]:
@@ -463,20 +476,21 @@ class HoustonFinancialAgent:
     
     def validate_response(self, response: Dict) -> Dict:
         """Ensure response quality before returning"""
-        answer = response.get("answer", "")
-        
-        # Enhance short responses
-        if len(answer) < 50:
-            response["answer"] = self._enhance_short_response(answer, response.get("sources", []))
-        
-        # Ensure sources are provided
+        summary = response.get("summary", "")
+
+        if len(summary) < 50:
+            enhanced = self._enhance_short_response(summary, response.get("sources", []))
+            response["summary"] = enhanced
+            response["answer"] = enhanced
+
         if not response.get("sources"):
             response["sources"] = get_default_houston_sources()[:3]
-        
-        # Add next steps if missing actionable content
-        if not self._contains_actionable_steps(answer):
-            response["answer"] += "\n\n" + self._add_next_steps(response.get("intent_classification", {}))
-        
+
+        if not self._contains_actionable_steps(summary) and not response.get("actionable_steps"):
+            addl = self._add_next_steps(response.get("intent_classification", {}))
+            response["summary"] += "\n\n" + addl
+            response["answer"] = response["summary"]
+
         return response
     
     def _enhance_short_response(self, answer: str, sources: List[Dict]) -> str:
@@ -573,38 +587,42 @@ I apologize for the inconvenience and recommend trying again later.""",
             "action_items": ["Contact these organizations directly", "Try your specific question again later"],
             "priority_level": "medium"
         }
+
+    def _clarify_intent(self, question: str) -> str:
         """Ask clarifying questions to better understand user needs"""
-        clarifying_questions = """
-        To help you better, could you please clarify:
-        
-        1. What specific type of financial assistance do you need? (rent, utilities, food, etc.)
-        2. Are you a Harris County resident?
-        3. What's your current household size?
-        4. Do you have any specific urgent deadlines or situations?
-        5. Have you applied for assistance programs before?
-        
-        The more details you can provide, the better I can help you find the right resources.
-        """
-        return clarifying_questions.strip()
+        questions = self._generate_clarifying_questions(question)
+        if not questions:
+            return "Could you provide more details about your financial assistance needs?"
+
+        formatted = "To help you better, could you please clarify:\n\n"
+        for idx, q in enumerate(questions, 1):
+            formatted += f"{idx}. {q}\n"
+        return formatted.strip()
     
-    def _get_agent_prompt(self) -> str:
-        """Get the system prompt for the agent"""
-        return """You are a helpful AI assistant specializing in Houston/Harris County financial assistance programs.
+    def _get_agent_prompt(self) -> "ChatPromptTemplate":
+        """Return a chat prompt template for the tools agent"""
+        system_msg = (
+            "You are a helpful AI assistant specializing in Houston/Harris County financial assistance programs.\n\n"
+            "Your role is to:\n"
+            "1. Help users find relevant financial assistance programs\n"
+            "2. Provide budgeting advice and financial planning guidance\n"
+            "3. Ask clarifying questions when needed to better understand user needs\n"
+            "4. Connect users with appropriate local resources\n\n"
+            "You have access to tools for:\n"
+            "- Searching Houston financial assistance programs\n"
+            "- Providing budgeting advice\n"
+            "- Clarifying user intent\n\n"
+            "Always be empathetic, practical, and focused on actionable next steps.\n"
+            "When recommending programs, include contact information when available."
+        )
 
-Your role is to:
-1. Help users find relevant financial assistance programs
-2. Provide budgeting advice and financial planning guidance  
-3. Ask clarifying questions when needed to better understand user needs
-4. Connect users with appropriate local resources
-
-You have access to tools for:
-- Searching Houston financial assistance programs
-- Providing budgeting advice
-- Clarifying user intent
-
-Always be empathetic, practical, and focused on actionable next steps. 
-When recommending programs, include contact information when available.
-"""
+        return ChatPromptTemplate.from_messages(
+            [
+                ("system", system_msg),
+                ("human", "{input}"),
+                ("ai", "{agent_scratchpad}"),
+            ]
+        )
     
     def process_query(self, query: str, user_context: Optional[Dict] = None, conversation_history: Optional[List[Dict]] = None) -> Dict[str, Any]:
         """Process a user query using the agent or fallback to basic AI"""
