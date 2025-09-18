@@ -41,15 +41,15 @@ export default function LandingPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center">
           <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 animate-fade-in">
-            Navigate Your
+            TrustAgent
             <span className="block text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-primary-600">
-              Financial Future
+              AP2-Powered Financial Co-Pilot
             </span>
           </h1>
           
           <p className="text-xl text-dark-900 mb-8 max-w-3xl mx-auto">
-            Houston Financial Navigator helps residents find financial aid programs and understand their spending patterns. 
-            Get personalized insights and discover local assistance programs tailored to your needs.
+            Experience the future of autonomous financial management with Agent Payments Protocol (AP2). 
+            Smart budget enforcement, automated savings, and AI-powered insights - all secured by cryptographic mandates.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
@@ -80,12 +80,54 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Features Grid */}
+        {/* AP2 Features Grid */}
         <div className="grid md:grid-cols-3 gap-8 mb-16">
           <Card hoverable className="animate-slide-up">
             <CardContent className="p-8">
               <div className="bg-primary-500/20 rounded-lg p-3 w-fit mb-4">
-                <PieChart className="h-8 w-8 text-primary-500" />
+                <Shield className="h-8 w-8 text-primary-500" />
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-2">AP2 Secure Mandates</h3>
+              <p className="text-dark-900">
+                Cryptographically signed financial mandates enable autonomous operations. 
+                Create intent, cart, and payment mandates for secure automated financial management.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card hoverable className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
+            <CardContent className="p-8">
+              <div className="bg-accent-emerald/20 rounded-lg p-3 w-fit mb-4">
+                <Zap className="h-8 w-8 text-accent-emerald" />
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-2">Smart Automation</h3>
+              <p className="text-dark-900">
+                AI-powered savings goals, budget enforcement with real-time alerts, 
+                and subscription optimization that works autonomously to improve your finances.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card hoverable className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
+            <CardContent className="p-8">
+              <div className="bg-purple-500/20 rounded-lg p-3 w-fit mb-4">
+                <TrendingUp className="h-8 w-8 text-purple-400" />
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-2">Scenario Analysis</h3>
+              <p className="text-dark-900">
+                "What If" scenario modeling and emergency financial response system. 
+                Get AI recommendations for income changes, expense reductions, and emergency planning.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Traditional Features */}
+        <div className="grid md:grid-cols-3 gap-8 mb-16">
+          <Card hoverable className="animate-slide-up">
+            <CardContent className="p-8">
+              <div className="bg-blue-500/20 rounded-lg p-3 w-fit mb-4">
+                <PieChart className="h-8 w-8 text-blue-400" />
               </div>
               <h3 className="text-xl font-semibold text-white mb-2">Smart Financial Dashboard</h3>
               <p className="text-dark-900">
@@ -97,8 +139,8 @@ export default function LandingPage() {
 
           <Card hoverable className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
             <CardContent className="p-8">
-              <div className="bg-accent-emerald/20 rounded-lg p-3 w-fit mb-4">
-                <Users className="h-8 w-8 text-accent-emerald" />
+              <div className="bg-green-500/20 rounded-lg p-3 w-fit mb-4">
+                <Users className="h-8 w-8 text-green-400" />
               </div>
               <h3 className="text-xl font-semibold text-white mb-2">Local Aid Programs</h3>
               <p className="text-dark-900">
@@ -110,13 +152,13 @@ export default function LandingPage() {
 
           <Card hoverable className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
             <CardContent className="p-8">
-              <div className="bg-purple-500/20 rounded-lg p-3 w-fit mb-4">
-                <TrendingUp className="h-8 w-8 text-purple-400" />
+              <div className="bg-orange-500/20 rounded-lg p-3 w-fit mb-4">
+                <DollarSign className="h-8 w-8 text-orange-400" />
               </div>
-              <h3 className="text-xl font-semibold text-white mb-2">Real-time Insights</h3>
+              <h3 className="text-xl font-semibold text-white mb-2">Capital One Integration</h3>
               <p className="text-dark-900">
                 Connect with Capital One's Nessie sandbox API for real-time financial data and 
-                personalized spending analysis.
+                autonomous financial operations powered by AP2 protocol.
               </p>
             </CardContent>
           </Card>
@@ -125,10 +167,10 @@ export default function LandingPage() {
         {/* Benefits Section */}
         <Card className="p-8 md:p-12 mb-16">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-white mb-4">Why Choose Houston Financial Navigator?</h2>
+            <h2 className="text-3xl font-bold text-white mb-4">Why Choose TrustAgent?</h2>
             <p className="text-dark-900 max-w-2xl mx-auto">
-              Designed specifically for Houston residents, our platform combines cutting-edge technology 
-              with local expertise to help you make informed financial decisions.
+              The world's first AP2-powered financial co-pilot, combining cutting-edge autonomous payment protocol 
+              with AI-driven financial intelligence for Houston residents.
             </p>
           </div>
 
