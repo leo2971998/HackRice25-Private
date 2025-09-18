@@ -47,12 +47,20 @@ export default function Navbar() {
               Learn
             </NavLink>
             {user && (
-              <NavLink 
-                to="/dashboard" 
-                className={({isActive}) => `hover:text-primary-500 transition-colors ${isActive ? "text-primary-500 font-medium" : "text-dark-900"}`}
-              >
-                Dashboard
-              </NavLink>
+              <>
+                <NavLink 
+                  to="/dashboard" 
+                  className={({isActive}) => `hover:text-primary-500 transition-colors ${isActive ? "text-primary-500 font-medium" : "text-dark-900"}`}
+                >
+                  Dashboard
+                </NavLink>
+                <NavLink 
+                  to="/trustagent" 
+                  className={({isActive}) => `hover:text-primary-500 transition-colors ${isActive ? "text-primary-500 font-medium" : "text-dark-900"}`}
+                >
+                  TrustAgent
+                </NavLink>
+              </>
             )}
             <NavLink 
               to="/admin" 

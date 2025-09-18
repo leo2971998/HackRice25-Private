@@ -9,6 +9,7 @@ import Onboarding from "@/pages/Onboarding";
 import Dashboard from "@/pages/Dashboard";
 import LandingPage from "@/pages/LandingPage";
 import DemoDashboard from "@/pages/DemoDashboard";
+import TrustAgentPage from "@/pages/TrustAgentPage";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { AuthProvider } from "@/context/Auth";
 import { Toaster } from "react-hot-toast";
@@ -56,6 +57,14 @@ export default function App() {
           <Layout>
             <ProtectedRoute requiresNessie>
               <Dashboard />
+            </ProtectedRoute>
+          </Layout>
+        } />
+        
+        <Route path="/trustagent" element={
+          <Layout>
+            <ProtectedRoute>
+              <TrustAgentPage />
             </ProtectedRoute>
           </Layout>
         } />
