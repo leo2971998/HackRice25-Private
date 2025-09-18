@@ -29,6 +29,7 @@ from routes.demo import bp as demo_bp
 from routes.chat import bp as chat_bp
 from routes.ap2 import bp as ap2_bp
 from routes.smart_finance import bp as smart_finance_bp
+from routes.firestore_portal import bp as firestore_portal_bp
 
 def create_app():
     app = Flask(__name__)
@@ -52,6 +53,7 @@ def create_app():
     app.register_blueprint(chat_bp)
     app.register_blueprint(ap2_bp)
     app.register_blueprint(smart_finance_bp)
+    app.register_blueprint(firestore_portal_bp)
 
     @app.get("/healthz")
     def healthz(): return "ok", 200
