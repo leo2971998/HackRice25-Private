@@ -8,6 +8,10 @@ import os
 from flask import Blueprint, request, jsonify, g
 from .auth import require_auth
 from utils.ap2_protocol import ap2_protocol, MandateType, MandateStatus
+from utils.firestore_db import (
+    create_ap2_transaction, get_ap2_transaction, update_ap2_transaction, 
+    get_user_ap2_transactions, delete_ap2_transaction
+)
 
 bp = Blueprint("ap2", __name__)
 
@@ -41,9 +45,32 @@ def create_intent_mandate():
         if intent_type in safe_intents:
             mandate.approve()
         
+        # Store in Firestore
+        firestore_data = {
+            "user_id": g.uid,
+            "mandate_id": mandate.id,
+            "mandate_type": mandate.type.value,
+            "intent_mandate": mandate.data,
+            "cart_mandate": None,
+            "payment_mandate": None,
+            "status": mandate.status.value,
+            "cryptographic_proofs": {
+                "signature": mandate.signature,
+                "verified": mandate.verify_signature(),
+                "algorithm": "HMAC-SHA256"
+            },
+            "expires_at": mandate.expires_at.isoformat(),
+            "auto_approved": intent_type in safe_intents
+        }
+        
+        success, message = create_ap2_transaction(mandate.id, firestore_data)
+        if not success:
+            return jsonify({"error": f"Failed to persist mandate: {message}"}), 500
+        
         return jsonify({
             "success": True,
             "mandate": mandate.to_dict(),
+            "firestore_status": message,
             "message": f"Intent mandate created for {intent_type}"
         })
         
@@ -73,9 +100,34 @@ def create_cart_mandate():
         if total_amount < 50:
             mandate.approve()
         
+        # Store in Firestore
+        firestore_data = {
+            "user_id": g.uid,
+            "mandate_id": mandate.id,
+            "mandate_type": mandate.type.value,
+            "intent_mandate": None,
+            "cart_mandate": mandate.data,
+            "payment_mandate": None,
+            "status": mandate.status.value,
+            "cryptographic_proofs": {
+                "signature": mandate.signature,
+                "verified": mandate.verify_signature(),
+                "algorithm": "HMAC-SHA256"
+            },
+            "expires_at": mandate.expires_at.isoformat(),
+            "auto_approved": total_amount < 50,
+            "total_amount": total_amount,
+            "items_count": len(items)
+        }
+        
+        success, message = create_ap2_transaction(mandate.id, firestore_data)
+        if not success:
+            return jsonify({"error": f"Failed to persist mandate: {message}"}), 500
+        
         return jsonify({
             "success": True,
             "mandate": mandate.to_dict(),
+            "firestore_status": message,
             "message": f"Cart mandate created with {len(items)} items (${total_amount})"
         })
         
@@ -103,9 +155,34 @@ def create_payment_mandate():
         if purpose == "emergency" and amount < 100:
             mandate.approve()
         
+        # Store in Firestore
+        firestore_data = {
+            "user_id": g.uid,
+            "mandate_id": mandate.id,
+            "mandate_type": mandate.type.value,
+            "intent_mandate": None,
+            "cart_mandate": None,
+            "payment_mandate": mandate.data,
+            "status": mandate.status.value,
+            "cryptographic_proofs": {
+                "signature": mandate.signature,
+                "verified": mandate.verify_signature(),
+                "algorithm": "HMAC-SHA256"
+            },
+            "expires_at": mandate.expires_at.isoformat(),
+            "auto_approved": purpose == "emergency" and amount < 100,
+            "amount": amount,
+            "purpose": purpose
+        }
+        
+        success, message = create_ap2_transaction(mandate.id, firestore_data)
+        if not success:
+            return jsonify({"error": f"Failed to persist mandate: {message}"}), 500
+        
         return jsonify({
             "success": True,
             "mandate": mandate.to_dict(),
+            "firestore_status": message,
             "message": f"Payment mandate created for {purpose} (${amount})"
         })
         
@@ -115,23 +192,53 @@ def create_payment_mandate():
 @bp.get("/api/ap2/mandates")
 @require_auth
 def get_user_mandates():
-    """Get all mandates for the current user"""
+    """Get all mandates for the current user from Firestore"""
     try:
         status_filter = request.args.get("status")
-        mandate_status = None
+        limit = int(request.args.get("limit", 50))
         
-        if status_filter:
-            try:
-                mandate_status = MandateStatus(status_filter.lower())
-            except ValueError:
-                return jsonify({"error": f"Invalid status: {status_filter}"}), 400
+        # Get transactions from Firestore
+        transactions, message = get_user_ap2_transactions(g.uid, status_filter, limit)
         
-        mandates = ap2_protocol.get_user_mandates(g.uid, mandate_status)
+        if not transactions and "not available" in message:
+            # Fallback to in-memory AP2 protocol if Firestore not available
+            mandate_status = None
+            if status_filter:
+                try:
+                    mandate_status = MandateStatus(status_filter.lower())
+                except ValueError:
+                    return jsonify({"error": f"Invalid status: {status_filter}"}), 400
+            
+            mandates = ap2_protocol.get_user_mandates(g.uid, mandate_status)
+            return jsonify({
+                "success": True,
+                "mandates": [mandate.to_dict() for mandate in mandates],
+                "count": len(mandates),
+                "source": "ap2_protocol_fallback"
+            })
+        
+        # Format transactions for frontend compatibility
+        formatted_mandates = []
+        for transaction in transactions:
+            mandate_data = {
+                "id": transaction.get("mandate_id", transaction.get("id")),
+                "type": transaction.get("mandate_type"),
+                "user_id": transaction.get("user_id"),
+                "data": transaction.get("intent_mandate") or transaction.get("cart_mandate") or transaction.get("payment_mandate"),
+                "status": transaction.get("status"),
+                "created_at": transaction.get("created_at"),
+                "expires_at": transaction.get("expires_at"),
+                "signature": transaction.get("cryptographic_proofs", {}).get("signature"),
+                "is_valid": transaction.get("cryptographic_proofs", {}).get("verified", False),
+                "auto_approved": transaction.get("auto_approved", False)
+            }
+            formatted_mandates.append(mandate_data)
         
         return jsonify({
             "success": True,
-            "mandates": [mandate.to_dict() for mandate in mandates],
-            "count": len(mandates)
+            "mandates": formatted_mandates,
+            "count": len(formatted_mandates),
+            "source": "firestore"
         })
         
     except Exception as e:
