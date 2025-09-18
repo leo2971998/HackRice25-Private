@@ -6,6 +6,13 @@ PyJWT==2.8.0
 werkzeug>=2.3.3
 google-cloud-firestore==2.13.1
 google-generativeai==0.3.2
+# Firebase Admin SDK for enhanced Firestore management
+firebase-admin>=6.0.0
+# FastAPI for AP2 agent backend
+fastapi>=0.100.0
+uvicorn>=0.20.0
+# Enhanced cryptography for AP2 protocol
+cryptography>=40.0.0
 # LangChain dependencies for AI agent framework
 langchain==0.1.6
 langchain-google-genai==0.0.8
