@@ -6,9 +6,10 @@ import { useAuth } from "@/context/Auth";
 interface ProtectedRouteProps {
   children: ReactNode;
   requiresNessie?: boolean;
+  requiresAdmin?: boolean;
 }
 
-export default function ProtectedRoute({ children, requiresNessie = false }: ProtectedRouteProps) {
+export default function ProtectedRoute({ children, requiresNessie = false, requiresAdmin = false }: ProtectedRouteProps) {
   const { user, loading } = useAuth();
 
   if (loading) {
@@ -28,6 +29,10 @@ export default function ProtectedRoute({ children, requiresNessie = false }: Pro
 
   if (requiresNessie && !user.nessie_customer_id) {
     return <Navigate to="/onboarding" replace />;
+  }
+
+  if (requiresAdmin && user.role !== "admin") {
+    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;

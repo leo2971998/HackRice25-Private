@@ -9,4 +9,10 @@ export type Source = {
   last_verified?: string;
 };
 
-export type ChatMsg = { role: "user" | "bot"; content: string; sources?: Source[] };
+export type ChatMsg = {
+  id?: string;
+  role: "user" | "bot";
+  content: string;
+  sources?: Source[];
+  timestamp?: string;
+};

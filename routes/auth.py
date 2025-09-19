@@ -97,24 +97,23 @@ def register():
     pw = data.get("password") or ""
     first = data.get("first_name") or ""
     last  = data.get("last_name") or ""
-    role = data.get("role") or "user"  # Default to 'user', allow 'admin'
-    
-    # Validate role
-    if role not in ["user", "admin"]:
-        return jsonify(error="Invalid role. Must be 'user' or 'admin'"), 400
+    requested_role = (data.get("role") or "user").strip().lower()
+
+    if requested_role == "admin":
+        return jsonify(error="Admin accounts must be created by an existing administrator."), 403
     
     if not email or not pw:
         return jsonify(error="email and password required"), 400
     try:
         db().execute(
           "INSERT INTO users(email,password_hash,first_name,last_name,role,created_at) VALUES(?,?,?,?,?,?)",
-          (email, generate_password_hash(pw), first, last, role, int(time.time()))
+          (email, generate_password_hash(pw), first, last, "user", int(time.time()))
         )
         db().commit()
     except sqlite3.IntegrityError:
         return jsonify(error="email already registered"), 409
     uid = db().execute("SELECT id FROM users WHERE email=?", (email,)).fetchone()["id"]
-    resp = make_response(jsonify(ok=True, message=f"{role.title()} account created successfully"))
+    resp = make_response(jsonify(ok=True, message="Account created successfully"))
     resp.set_cookie("session", issue_token(uid), httponly=True, samesite="Lax")
     return resp
 
@@ -153,3 +152,66 @@ def me():
     if not user_data.get("role"):
         user_data["role"] = "user"
     return jsonify(user_data)
+
+
+@bp.get("/auth/users")
+@require_admin
+def list_users():
+    rows = db().execute(
+        "SELECT id,email,first_name,last_name,role,created_at FROM users ORDER BY created_at DESC"
+    ).fetchall()
+    users = [dict(row) for row in rows]
+    for user in users:
+        user.setdefault("role", "user")
+    return jsonify(users)
+
+
+@bp.patch("/auth/users/<int:user_id>")
+@require_admin
+def update_user(user_id: int):
+    payload = request.get_json() or {}
+    new_role = (payload.get("role") or "user").strip().lower()
+    if new_role not in {"user", "admin"}:
+        return jsonify(error="Role must be 'user' or 'admin'."), 400
+
+    row = db().execute("SELECT role FROM users WHERE id=?", (user_id,)).fetchone()
+    if not row:
+        return jsonify(error="User not found."), 404
+
+    current_role = row["role"] if row["role"] else "user"
+
+    if current_role == "admin" and new_role != "admin":
+        remaining_admins = db().execute(
+            "SELECT COUNT(*) AS c FROM users WHERE role='admin' AND id != ?",
+            (user_id,),
+        ).fetchone()["c"]
+        if remaining_admins == 0:
+            return jsonify(error="Cannot remove the last administrator."), 400
+
+    db().execute("UPDATE users SET role=? WHERE id=?", (new_role, user_id))
+    db().commit()
+    return jsonify(ok=True)
+
+
+@bp.delete("/auth/users/<int:user_id>")
+@require_admin
+def delete_user(user_id: int):
+    if user_id == getattr(g, "uid", None):
+        return jsonify(error="Administrators cannot delete their own account."), 400
+
+    row = db().execute("SELECT role FROM users WHERE id=?", (user_id,)).fetchone()
+    if not row:
+        return jsonify(error="User not found."), 404
+
+    existing_role = row["role"] if row["role"] else "user"
+    if existing_role == "admin":
+        remaining_admins = db().execute(
+            "SELECT COUNT(*) AS c FROM users WHERE role='admin' AND id != ?",
+            (user_id,),
+        ).fetchone()["c"]
+        if remaining_admins == 0:
+            return jsonify(error="Cannot remove the last administrator."), 400
+
+    db().execute("DELETE FROM users WHERE id=?", (user_id,))
+    db().commit()
+    return jsonify(ok=True)

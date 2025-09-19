@@ -11,7 +11,6 @@ export default function RegisterPage() {
     password: "",
     first_name: "",
     last_name: "",
-    role: "user", // Default to user role
   });
   const [loading, setLoading] = useState(false);
   const nav = useNavigate();
@@ -26,14 +25,8 @@ export default function RegisterPage() {
       const user = await me();
       setUser(user);
       
-      // Route based on user role
-      if (user.role === "admin") {
-        nav("/admin");
-        toast.success("Admin account created successfully!");
-      } else {
-        nav("/onboarding");
-        toast.success("Account created successfully!");
-      }
+      nav("/onboarding");
+      toast.success("Account created successfully!");
     } catch (error: any) {
       toast.error(error?.response?.data?.error || "Registration failed");
     } finally {
@@ -41,22 +34,22 @@ export default function RegisterPage() {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   return (
-    <div className="flex items-center justify-center py-12 px-4 bg-gradient-to-br from-blue-50 to-indigo-100 min-h-[calc(100vh-8rem)]">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8">
+    <div className="flex items-center justify-center py-12 px-4 bg-white min-h-[calc(100vh-8rem)] text-black">
+      <div className="max-w-md w-full bg-white border border-gray-200 rounded-2xl shadow-sm p-8">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Join Houston Financial Navigator</h1>
-          <p className="text-gray-600">Create your account to start your financial journey</p>
+          <h1 className="text-3xl font-bold text-black mb-2">Join Houston Financial Navigator</h1>
+          <p className="text-black">Create your account to start your financial journey</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 text-black">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="first_name" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="first_name" className="block text-sm font-medium text-black mb-1">
                 First Name
               </label>
               <input
@@ -65,12 +58,12 @@ export default function RegisterPage() {
                 type="text"
                 value={formData.first_name}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-black"
                 placeholder="John"
               />
             </div>
             <div>
-              <label htmlFor="last_name" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="last_name" className="block text-sm font-medium text-black mb-1">
                 Last Name
               </label>
               <input
@@ -79,14 +72,14 @@ export default function RegisterPage() {
                 type="text"
                 value={formData.last_name}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-black"
                 placeholder="Doe"
               />
             </div>
           </div>
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="email" className="block text-sm font-medium text-black mb-1">
               Email
             </label>
             <input
@@ -96,13 +89,13 @@ export default function RegisterPage() {
               value={formData.email}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-black"
               placeholder="your@email.com"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="password" className="block text-sm font-medium text-black mb-1">
               Password
             </label>
             <input
@@ -112,34 +105,15 @@ export default function RegisterPage() {
               value={formData.password}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-black"
               placeholder="••••••••"
             />
-          </div>
-
-          <div>
-            <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
-              Account Type
-            </label>
-            <select
-              id="role"
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-            >
-              <option value="user">Regular User</option>
-              <option value="admin">Admin (For Administrators)</option>
-            </select>
-            <p className="mt-1 text-xs text-gray-500">
-              Select "Admin" only if you are setting up an administrator account for demo purposes.
-            </p>
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-lg font-semibold disabled:opacity-60 disabled:cursor-not-allowed hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg"
+            className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold disabled:opacity-60 disabled:cursor-not-allowed hover:bg-blue-700 transition-all duration-200 shadow-sm"
           >
             {loading ? (
               <div className="flex items-center justify-center space-x-2">
@@ -153,7 +127,7 @@ export default function RegisterPage() {
         </form>
 
         <div className="mt-6 text-center">
-          <p className="text-gray-600">
+          <p className="text-black">
             Already have an account?{" "}
             <Link to="/login" className="text-blue-600 hover:text-blue-800 font-medium">
               Sign in
