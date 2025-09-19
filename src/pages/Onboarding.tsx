@@ -31,23 +31,23 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="flex items-center justify-center py-12 px-4 bg-white min-h-[calc(100vh-8rem)]">
-      <div className="max-w-2xl w-full bg-white border border-gray-200 rounded-2xl shadow-sm p-8 space-y-6">
+    <div className="flex items-center justify-center py-12 px-4 bg-dark-100 min-h-[calc(100vh-8rem)]">
+      <div className="max-w-2xl w-full bg-dark-200 border border-dark-400 rounded-2xl shadow-xl p-8 space-y-6">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-black mb-2">
+          <h1 className="text-3xl font-bold text-white mb-2">
             Welcome to Houston Financial Navigator
           </h1>
-          <p className="text-black">
+          <p className="text-dark-900">
             Let's set up your personalized financial dashboard
           </p>
         </div>
 
         <div className="space-y-4">
-          <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-            <h2 className="text-lg font-semibold text-blue-900 mb-2">
+          <div className="bg-dark-300/60 rounded-lg p-4 border border-dark-400">
+            <h2 className="text-lg font-semibold text-white mb-2">
               What we'll create for you:
             </h2>
-            <ul className="text-blue-800 space-y-1 text-sm">
+            <ul className="text-dark-900 space-y-1 text-sm">
               <li>• A sandbox customer profile</li>
               <li>• A checking account with sample transactions</li>
               <li>• Your personalized financial dashboard</li>
@@ -57,7 +57,7 @@ export default function Onboarding() {
           <button
             disabled={busy}
             onClick={handleSetup}
-            className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-4 font-semibold disabled:opacity-60 disabled:cursor-not-allowed hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg"
+            className="w-full rounded-xl bg-gradient-to-r from-primary-500 to-primary-600 text-white px-6 py-4 font-semibold disabled:opacity-60 disabled:cursor-not-allowed hover:from-primary-600 hover:to-primary-700 transition-all duration-200 shadow-lg"
           >
             {busy ? (
               <div className="flex items-center justify-center space-x-2">
@@ -71,7 +71,7 @@ export default function Onboarding() {
         </div>
 
         <div className="text-center">
-          <p className="text-sm text-black">
+          <p className="text-sm text-dark-900">
             This will create a demo account with sample data for learning purposes
           </p>
         </div>
