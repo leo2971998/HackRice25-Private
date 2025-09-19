@@ -44,7 +44,7 @@ export default function LoginPage() {
       <div className="max-w-2xl w-full bg-dark-200 border border-dark-400 rounded-2xl shadow-xl p-8">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-white mb-2">Welcome Back</h1>
-          <p className="text-dark-300">Sign in to your Houston Financial Navigator account</p>
+          <p className="text-white/80">Sign in to your Houston Financial Navigator account</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 text-white">
@@ -95,7 +95,7 @@ export default function LoginPage() {
         </form>
 
         <div className="mt-6 text-center">
-          <p className="text-dark-300">
+          <p className="text-white/80">
             Don't have an account?{" "}
             <Link to="/register" className="text-primary-500 hover:text-primary-400 font-medium">
               Sign up
