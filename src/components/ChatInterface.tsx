@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../config/firebase';
+import { useAuth } from '@/context/Auth';
 import './ChatInterface.css';
 
 interface Message {
@@ -34,7 +35,8 @@ const ChatInterface: React.FC = () => {
   const [currentSessionId, setCurrentSessionId] = useState<string>('');
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [userId] = useState('demo_user_123'); // In real app, get from auth context
+  const { user } = useAuth();
+  const userId = user?.id || 'anonymous';
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -124,7 +126,7 @@ const ChatInterface: React.FC = () => {
       setMessages([]);
       
       // Add welcome message
-      await addMessage('agent', 'Hello! I\'m your TrustAgent. I can help you with financial planning, payments, and autonomous transactions using the AP2 protocol. How can I assist you today?', 'system');
+      await addMessage('agent', 'Hello! I\'m Inflate-Wise, your AI financial co-pilot. I can help you understand your personal inflation rate, analyze your spending patterns, and provide insights to combat inflation. How can I assist you today?', 'system');
     } catch (error) {
       console.error('Error creating chat session:', error);
     }
@@ -331,7 +333,7 @@ const ChatInterface: React.FC = () => {
           >
             ☰
           </button>
-          <h2>TrustAgent - AP2 Financial Assistant</h2>
+          <h2>Inflate-Wise - AI Financial Co-Pilot</h2>
         </div>
 
         <div className="messages-container">

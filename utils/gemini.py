@@ -87,6 +87,28 @@ def categorize_transaction(description: str) -> str:
     return "Other"
 
 
+def categorize_transactions(transactions: Iterable[Dict[str, Any]]) -> list[Dict[str, Any]]:
+    """Categorize a list of transactions using Gemini AI.
+    
+    Returns the transactions with an added 'ai_category' field.
+    """
+    categorized = []
+    for transaction in transactions:
+        # Make a copy to avoid modifying the original
+        categorized_transaction = dict(transaction)
+        
+        # Get the transaction description/name
+        description = transaction.get("name") or transaction.get("description") or ""
+        
+        # Categorize the transaction
+        category = categorize_transaction(description)
+        categorized_transaction["ai_category"] = category
+        
+        categorized.append(categorized_transaction)
+    
+    return categorized
+
+
 def build_financial_coach_response(context: Dict[str, Any], question: str) -> str:
     """Craft a personalised coaching response using Gemini."""
 
