@@ -31,13 +31,13 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="flex items-center justify-center py-12 px-4 bg-gradient-to-br from-blue-50 to-indigo-100 min-h-[calc(100vh-8rem)]">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 space-y-6">
+    <div className="flex items-center justify-center py-12 px-4 bg-white min-h-[calc(100vh-8rem)]">
+      <div className="max-w-2xl w-full bg-white border border-gray-200 rounded-2xl shadow-sm p-8 space-y-6">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl font-bold text-black mb-2">
             Welcome to Houston Financial Navigator
           </h1>
-          <p className="text-gray-600">
+          <p className="text-black">
             Let's set up your personalized financial dashboard
           </p>
         </div>
@@ -71,7 +71,7 @@ export default function Onboarding() {
         </div>
 
         <div className="text-center">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-black">
             This will create a demo account with sample data for learning purposes
           </p>
         </div>

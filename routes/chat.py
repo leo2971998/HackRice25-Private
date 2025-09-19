@@ -163,6 +163,7 @@ def fetch_session(session_id: str):
 
 
 @bp.post("/ask")
+@require_auth
 def ask():
     """Handle AI chat questions using AI microservice or fallback to local processing"""
     data = request.get_json() or {}
@@ -172,15 +173,15 @@ def ask():
     if not question:
         return jsonify({"error": "Question is required"}), 400
 
-    authed_user_id = _get_authenticated_user_id()
+    authed_user_id = g.uid
     session_data: Optional[Dict[str, Any]] = None
 
-    if authed_user_id and session_id:
+    if session_id:
         try:
             session_data = _ensure_chat_session(session_id, authed_user_id, data.get("title"))
         except Exception as exc:
             return jsonify({"error": f"Failed to prepare session: {exc}"}), 400
-    elif authed_user_id and not session_id:
+    else:
         session_id = str(uuid.uuid4())
         try:
             session_data = _ensure_chat_session(session_id, authed_user_id, data.get("title"))
@@ -201,8 +202,8 @@ def ask():
             if isinstance(m, dict) and m.get("role") and m.get("content")
         ]
 
-    if authed_user_id and session_id:
-        add_message_to_session(session_id, {"role": "user", "content": question})
+    # Now that we have authentication, always save the message
+    add_message_to_session(session_id, {"role": "user", "content": question})
 
     # Try to use AI microservice first if URL is configured
     ai_service_url = os.getenv('AI_SERVICE_URL')
@@ -260,27 +261,27 @@ def ask():
             "session_id": session_id,
         }
 
-        if authed_user_id and session_id:
-            bot_message: Dict[str, Any] = {
-                "role": "bot",
-                "content": response.get("summary", ""),
-            }
-            if response.get("sources"):
-                bot_message["sources"] = response.get("sources")
-            add_message_to_session(session_id, bot_message)
+        # Now that we have authentication, always save the bot response
+        bot_message: Dict[str, Any] = {
+            "role": "bot",
+            "content": response.get("summary", ""),
+        }
+        if response.get("sources"):
+            bot_message["sources"] = response.get("sources")
+        add_message_to_session(session_id, bot_message)
 
-            # Update session metadata
-            session_snapshot, _ = get_chat_session(session_id)
-            if session_snapshot:
-                messages = session_snapshot.get("messages", []) or []
-                metadata: Dict[str, Any] = {
-                    "last_message": response.get("summary", ""),
-                    "message_count": len(messages),
-                }
-                existing_title = session_snapshot.get("title")
-                if existing_title in (None, "", "New Conversation"):
-                    metadata["title"] = question[:60]
-                update_chat_session(session_id, metadata)
+        # Update session metadata
+        session_snapshot, _ = get_chat_session(session_id)
+        if session_snapshot:
+            messages = session_snapshot.get("messages", []) or []
+            metadata: Dict[str, Any] = {
+                "last_message": response.get("summary", ""),
+                "message_count": len(messages),
+            }
+            existing_title = session_snapshot.get("title")
+            if existing_title in (None, "", "New Conversation"):
+                metadata["title"] = question[:60]
+            update_chat_session(session_id, metadata)
 
         return jsonify(response_payload)
 

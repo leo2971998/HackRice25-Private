@@ -40,7 +40,7 @@ export default function RegisterPage() {
 
   return (
     <div className="flex items-center justify-center py-12 px-4 bg-white min-h-[calc(100vh-8rem)] text-black">
-      <div className="max-w-md w-full bg-white border border-gray-200 rounded-2xl shadow-sm p-8">
+      <div className="max-w-2xl w-full bg-white border border-gray-200 rounded-2xl shadow-sm p-8">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-black mb-2">Join Houston Financial Navigator</h1>
           <p className="text-black">Create your account to start your financial journey</p>
