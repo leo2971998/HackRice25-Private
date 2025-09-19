@@ -108,27 +108,27 @@ export default function LearnPage() {
   const budgetBreakdown = calculateBudgetBreakdown();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+    <div className="min-h-screen bg-dark-100 p-4">
       <div className="max-w-6xl mx-auto space-y-6">
         
         {/* Header */}
-        <div className="bg-white rounded-2xl shadow-xl p-6">
+        <div className="bg-dark-200 rounded-2xl shadow-xl p-6 border border-dark-400">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-full p-3">
                 <BookOpen className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Financial Learning Center</h1>
-                <p className="text-gray-600">Master budgeting and financial planning skills</p>
+                <h1 className="text-2xl font-bold text-white">Financial Learning Center</h1>
+                <p className="text-dark-900">Master budgeting and financial planning skills</p>
               </div>
             </div>
             <div className="text-right">
-              <div className="flex items-center space-x-2 text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full mb-2">
+              <div className="flex items-center space-x-2 text-emerald-300 bg-emerald-500/10 px-3 py-1 rounded-full mb-2">
                 <Award className="h-4 w-4" />
                 <span className="text-xs font-medium">{completedLessons}/{totalLessons} Complete</span>
               </div>
-              <div className="w-32 bg-gray-200 rounded-full h-2">
+              <div className="w-32 bg-dark-400 rounded-full h-2">
                 <div 
                   className="bg-gradient-to-r from-green-600 to-emerald-600 h-2 rounded-full transition-all duration-300"
                   style={{ width: `${progressPercentage}%` }}
@@ -139,19 +139,19 @@ export default function LearnPage() {
         </div>
 
         {/* Quick Tips */}
-        <div className="bg-white rounded-2xl shadow-xl p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center space-x-2">
-            <Lightbulb className="h-5 w-5 text-yellow-600" />
+        <div className="bg-dark-200 rounded-2xl shadow-xl p-6 border border-dark-400">
+          <h2 className="text-xl font-bold text-white mb-4 flex items-center space-x-2">
+            <Lightbulb className="h-5 w-5 text-accent-gold" />
             <span>Quick Financial Tips</span>
           </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
             {tips.map((tip, index) => (
-              <div key={index} className="p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-200 hover:shadow-md transition-all">
+              <div key={index} className="p-4 bg-dark-300/60 rounded-xl border border-dark-400 hover:bg-dark-300/80 hover:shadow-md transition-all">
                 <div className="flex items-center space-x-3 mb-2">
-                  <tip.icon className="h-5 w-5 text-blue-600" />
-                  <h3 className="font-semibold text-gray-900 text-sm">{tip.title}</h3>
+                  <tip.icon className="h-5 w-5 text-primary-400" />
+                  <h3 className="font-semibold text-white text-sm">{tip.title}</h3>
                 </div>
-                <p className="text-xs text-gray-600">{tip.description}</p>
+                <p className="text-xs text-dark-900">{tip.description}</p>
               </div>
             ))}
           </div>
@@ -159,8 +159,8 @@ export default function LearnPage() {
 
         <div className="grid lg:grid-cols-2 gap-6">
           {/* Learning Modules */}
-          <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
+          <div className="bg-dark-200 rounded-2xl shadow-xl overflow-hidden border border-dark-400">
+            <div className="bg-gradient-to-r from-primary-600 to-primary-500 px-6 py-4">
               <h2 className="text-xl font-semibold text-white flex items-center space-x-2">
                 <Play className="h-5 w-5" />
                 <span>Learning Modules</span>
@@ -169,21 +169,21 @@ export default function LearnPage() {
             
             <div className="p-6 space-y-4">
               {lessons.map((lesson) => (
-                <div key={lesson.id} className="border-2 border-gray-200 rounded-xl p-4 hover:border-blue-300 transition-all">
+                <div key={lesson.id} className="border-2 border-dark-400 rounded-xl p-4 hover:border-primary-500 transition-all bg-dark-300/30">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className={`bg-gradient-to-r ${lesson.color} rounded-lg p-2`}>
                         <lesson.icon className="h-5 w-5 text-white" />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-gray-900 flex items-center space-x-2">
+                        <h3 className="font-semibold text-white flex items-center space-x-2">
                           <span>{lesson.title}</span>
                           {lessonProgress[lesson.id] && (
-                            <CheckCircle className="h-4 w-4 text-green-600" />
+                            <CheckCircle className="h-4 w-4 text-emerald-400" />
                           )}
                         </h3>
-                        <p className="text-sm text-gray-600">{lesson.description}</p>
-                        <span className="text-xs text-blue-600 font-medium">{lesson.estimated} read</span>
+                        <p className="text-sm text-dark-900">{lesson.description}</p>
+                        <span className="text-xs text-primary-400 font-medium">{lesson.estimated} read</span>
                       </div>
                     </div>
                     <button 
@@ -195,8 +195,8 @@ export default function LearnPage() {
                       }}
                       className={`px-4 py-2 rounded-lg font-medium text-sm transition-all ${
                         lessonProgress[lesson.id] 
-                          ? 'bg-green-100 text-green-700 hover:bg-green-200' 
-                          : 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                          ? 'bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30' 
+                          : 'bg-primary-500/20 text-primary-300 hover:bg-primary-500/30'
                       }`}
                     >
                       {activeLesson === lesson.id ? 'Hide' : lessonProgress[lesson.id] ? 'Review' : 'Start'}
@@ -204,11 +204,11 @@ export default function LearnPage() {
                   </div>
                   
                   {activeLesson === lesson.id && (
-                    <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                    <div className="mt-4 p-4 bg-dark-400/50 rounded-lg">
                       {lesson.id === "basics" && (
                         <div className="space-y-3">
-                          <h4 className="font-semibold text-gray-900">Budgeting Fundamentals</h4>
-                          <ul className="space-y-2 text-sm text-gray-700">
+                          <h4 className="font-semibold text-white">Budgeting Fundamentals</h4>
+                          <ul className="space-y-2 text-sm text-dark-900">
                             <li>• <strong>Track Income:</strong> Know exactly how much money comes in monthly</li>
                             <li>• <strong>List Expenses:</strong> Categorize all fixed and variable expenses</li>
                             <li>• <strong>Set Priorities:</strong> Distinguish between needs and wants</li>
@@ -219,8 +219,8 @@ export default function LearnPage() {
                       )}
                       {lesson.id === "50-30-20" && (
                         <div className="space-y-3">
-                          <h4 className="font-semibold text-gray-900">The 50/30/20 Rule</h4>
-                          <div className="space-y-2 text-sm text-gray-700">
+                          <h4 className="font-semibold text-white">The 50/30/20 Rule</h4>
+                          <div className="space-y-2 text-sm text-dark-900">
                             <div className="flex items-center space-x-2">
                               <div className="w-4 h-4 bg-blue-500 rounded"></div>
                               <span><strong>50% Needs:</strong> Housing, utilities, groceries, transportation</span>
@@ -238,8 +238,8 @@ export default function LearnPage() {
                       )}
                       {lesson.id === "emergency-fund" && (
                         <div className="space-y-3">
-                          <h4 className="font-semibold text-gray-900">Building Emergency Savings</h4>
-                          <ul className="space-y-2 text-sm text-gray-700">
+                          <h4 className="font-semibold text-white">Building Emergency Savings</h4>
+                          <ul className="space-y-2 text-sm text-dark-900">
                             <li>• <strong>Start Small:</strong> Begin with $500 for minor emergencies</li>
                             <li>• <strong>Build to 3-6 Months:</strong> Save 3-6 months of living expenses</li>
                             <li>• <strong>Keep Accessible:</strong> Use high-yield savings account</li>
@@ -250,8 +250,8 @@ export default function LearnPage() {
                       )}
                       {lesson.id === "debt-management" && (
                         <div className="space-y-3">
-                          <h4 className="font-semibold text-gray-900">Debt Payoff Strategies</h4>
-                          <ul className="space-y-2 text-sm text-gray-700">
+                          <h4 className="font-semibold text-white">Debt Payoff Strategies</h4>
+                          <ul className="space-y-2 text-sm text-dark-900">
                             <li>• <strong>List All Debts:</strong> Balance, minimum payment, interest rate</li>
                             <li>• <strong>Choose Strategy:</strong> Debt avalanche (highest interest) or snowball (smallest balance)</li>
                             <li>• <strong>Pay Minimums:</strong> Always pay minimum on all debts</li>
@@ -268,7 +268,7 @@ export default function LearnPage() {
           </div>
 
           {/* Interactive Budget Calculator */}
-          <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+          <div className="bg-dark-200 rounded-2xl shadow-xl overflow-hidden border border-dark-400">
             <div className="bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4">
               <h2 className="text-xl font-semibold text-white flex items-center space-x-2">
                 <Calculator className="h-5 w-5" />
@@ -279,68 +279,68 @@ export default function LearnPage() {
             <div className="p-6 space-y-6">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Monthly Income</label>
+                  <label className="block text-sm font-medium text-white mb-1">Monthly Income</label>
                   <input
                     type="number"
                     value={budgetData.income}
                     onChange={(e) => setBudgetData({...budgetData, income: Number(e.target.value)})}
-                    className="w-full rounded-lg border-2 border-gray-200 px-3 py-2 text-sm focus:border-green-500 focus:outline-none"
+                    className="w-full rounded-lg border-2 border-dark-400 bg-dark-300 text-white bg-dark-300 text-white px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
                   />
                 </div>
                 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Housing</label>
+                    <label className="block text-sm font-medium text-white mb-1">Housing</label>
                     <input
                       type="number"
                       value={budgetData.housing}
                       onChange={(e) => setBudgetData({...budgetData, housing: Number(e.target.value)})}
-                      className="w-full rounded-lg border-2 border-gray-200 px-3 py-2 text-sm focus:border-green-500 focus:outline-none"
+                      className="w-full rounded-lg border-2 border-dark-400 bg-dark-300 text-white px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Transportation</label>
+                    <label className="block text-sm font-medium text-white mb-1">Transportation</label>
                     <input
                       type="number"
                       value={budgetData.transportation}
                       onChange={(e) => setBudgetData({...budgetData, transportation: Number(e.target.value)})}
-                      className="w-full rounded-lg border-2 border-gray-200 px-3 py-2 text-sm focus:border-green-500 focus:outline-none"
+                      className="w-full rounded-lg border-2 border-dark-400 bg-dark-300 text-white px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Food</label>
+                    <label className="block text-sm font-medium text-white mb-1">Food</label>
                     <input
                       type="number"
                       value={budgetData.food}
                       onChange={(e) => setBudgetData({...budgetData, food: Number(e.target.value)})}
-                      className="w-full rounded-lg border-2 border-gray-200 px-3 py-2 text-sm focus:border-green-500 focus:outline-none"
+                      className="w-full rounded-lg border-2 border-dark-400 bg-dark-300 text-white px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Utilities</label>
+                    <label className="block text-sm font-medium text-white mb-1">Utilities</label>
                     <input
                       type="number"
                       value={budgetData.utilities}
                       onChange={(e) => setBudgetData({...budgetData, utilities: Number(e.target.value)})}
-                      className="w-full rounded-lg border-2 border-gray-200 px-3 py-2 text-sm focus:border-green-500 focus:outline-none"
+                      className="w-full rounded-lg border-2 border-dark-400 bg-dark-300 text-white px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Savings</label>
+                    <label className="block text-sm font-medium text-white mb-1">Savings</label>
                     <input
                       type="number"
                       value={budgetData.savings}
                       onChange={(e) => setBudgetData({...budgetData, savings: Number(e.target.value)})}
-                      className="w-full rounded-lg border-2 border-gray-200 px-3 py-2 text-sm focus:border-green-500 focus:outline-none"
+                      className="w-full rounded-lg border-2 border-dark-400 bg-dark-300 text-white px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Entertainment</label>
+                    <label className="block text-sm font-medium text-white mb-1">Entertainment</label>
                     <input
                       type="number"
                       value={budgetData.entertainment}
                       onChange={(e) => setBudgetData({...budgetData, entertainment: Number(e.target.value)})}
-                      className="w-full rounded-lg border-2 border-gray-200 px-3 py-2 text-sm focus:border-green-500 focus:outline-none"
+                      className="w-full rounded-lg border-2 border-dark-400 bg-dark-300 text-white px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
                     />
                   </div>
                 </div>
@@ -348,14 +348,14 @@ export default function LearnPage() {
               
               {/* Budget Visualization */}
               <div className="space-y-4">
-                <h3 className="font-semibold text-gray-900">Budget Breakdown</h3>
+                <h3 className="font-semibold text-white">Budget Breakdown</h3>
                 <div className="space-y-2">
                   {budgetBreakdown.categories.map((category, index) => (
                     <div key={index} className="flex items-center justify-between">
                       <div className="flex items-center space-x-3 flex-1">
                         <div className={`w-3 h-3 rounded-full ${category.color}`}></div>
-                        <span className="text-sm font-medium text-gray-700">{category.name}</span>
-                        <div className="flex-1 bg-gray-200 rounded-full h-2 mx-3">
+                        <span className="text-sm font-medium text-white">{category.name}</span>
+                        <div className="flex-1 bg-dark-400 rounded-full h-2 mx-3">
                           <div 
                             className={`${category.color} h-2 rounded-full transition-all duration-300`}
                             style={{ width: `${Math.min(category.percentage, 100)}%` }}
@@ -363,8 +363,8 @@ export default function LearnPage() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <span className="text-sm font-semibold text-gray-900">${category.amount}</span>
-                        <span className="text-xs text-gray-500 ml-2">({category.percentage.toFixed(1)}%)</span>
+                        <span className="text-sm font-semibold text-white">${category.amount}</span>
+                        <span className="text-xs text-dark-900 ml-2">({category.percentage.toFixed(1)}%)</span>
                       </div>
                     </div>
                   ))}
