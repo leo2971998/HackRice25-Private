@@ -1,4 +1,4 @@
-// Firebase configuration for TrustAgent frontend
+// Firebase configuration for Inflate-Wise frontend
 import { initializeApp } from 'firebase/app';
 import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
 import { getAuth, connectAuthEmulator } from 'firebase/auth';

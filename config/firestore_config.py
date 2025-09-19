@@ -11,7 +11,7 @@ from typing import Optional
 
 class FirestoreManager:
     """
-    Enhanced Firestore Manager for TrustAgent
+    Enhanced Firestore Manager for Inflate-Wise
     Provides centralized Firebase configuration and connection management
     """
     
