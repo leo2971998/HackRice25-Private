@@ -1,691 +1,161 @@
 # utils/ai_agent.py
 """
-Advanced AI Agent for Houston Financial Navigator
-Implements LangChain-based agent with tools and semantic search
+Inflate-Wise AI Agent for Personal Inflation Analysis
+Implements transaction categorization and inflation insights using Gemini
 """
 
 import os
 import logging
-import json
 from typing import List, Dict, Optional, Any
-from functools import lru_cache
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Import LangChain components with fallback
+# Import Gemini for inflation analysis
 try:
-    from langchain.agents import AgentExecutor, create_openai_tools_agent
-    from langchain.prompts import ChatPromptTemplate
-    from langchain.tools import Tool
-    from langchain.memory import ConversationBufferMemory
-    from langchain.schema import BaseMessage
-    from langchain_google_genai import ChatGoogleGenerativeAI
-    from langchain.text_splitter import RecursiveCharacterTextSplitter
-    from langchain.schema import Document
-    LANGCHAIN_AVAILABLE = True
-    logger.info("LangChain dependencies loaded successfully")
+    import google.generativeai as genai
+    from utils.gemini import build_financial_coach_response, categorize_transactions
+    GEMINI_AVAILABLE = True
+    logger.info("Gemini AI available for inflation analysis")
 except ImportError as e:
-    LANGCHAIN_AVAILABLE = False
-    logger.warning(f"LangChain not available: {e}")
-    
-    # Create dummy classes for type hints when LangChain is not available
-    class Tool:
-        def __init__(self, name, description, func):
-            self.name = name
-            self.description = description
-            self.func = func
-
-# Import sklearn for simple semantic similarity
-try:
-    from sklearn.feature_extraction.text import TfidfVectorizer
-    from sklearn.metrics.pairwise import cosine_similarity
-    import numpy as np
-    SKLEARN_AVAILABLE = True
-except ImportError:
-    SKLEARN_AVAILABLE = False
-    logger.warning("Sklearn not available for semantic search")
-
-# Fallback imports
-from .gemini_ai import generate_financial_assistance_response, get_default_houston_sources
+    GEMINI_AVAILABLE = False
+    logger.warning(f"Gemini AI not available: {e}")
 
 
-class HoustonFinancialAgent:
-    """Advanced AI agent for Houston financial assistance with semantic search and tools"""
+class InflateWiseAgent:
+    """AI agent focused on personal inflation analysis and financial insights"""
     
     def __init__(self):
-        self.agent = None
-        self.vectorizer = None
-        self.document_vectors = None
-        self.documents = []
-        self.memory = None
-        self.initialized = False
-        
-        # Always initialize semantic search (doesn't require API keys)
-        self._initialize_semantic_search()
-        
-        # Try to initialize agent components
-        if LANGCHAIN_AVAILABLE:
-            self._initialize_agent()
+        self.initialized = self._initialize_gemini()
     
-    def _initialize_agent(self) -> bool:
-        """Initialize the LangChain agent with tools and memory"""
+    def _initialize_gemini(self) -> bool:
+        """Initialize Gemini AI for inflation analysis"""
         try:
-            # Check for API key
             api_key = os.getenv('GEMINI_API_KEY')
             if not api_key:
                 logger.warning("GEMINI_API_KEY not found, agent initialization skipped")
                 return False
             
-            # Initialize LLM
-            llm = ChatGoogleGenerativeAI(
-                model="gemini-1.5-pro-latest",
-                google_api_key=api_key,
-                temperature=0.3,
-                convert_system_message_to_human=True
-            )
-            
-            # Initialize memory
-            self.memory = ConversationBufferMemory(
-                memory_key="chat_history",
-                return_messages=True
-            )
-            
-            # Create tools
-            tools = self._create_tools()
-            
-            # Create agent
-            self.agent = create_openai_tools_agent(
-                llm=llm,
-                tools=tools,
-                prompt=self._get_agent_prompt()
-            )
-            
-            self.agent_executor = AgentExecutor(
-                agent=self.agent,
-                tools=tools,
-                memory=self.memory,
-                verbose=True,
-                handle_parsing_errors=True
-            )
-            
-            self.initialized = True
-            logger.info("Houston Financial Agent initialized successfully")
+            genai.configure(api_key=api_key)
+            logger.info("Gemini AI initialized successfully")
             return True
-            
         except Exception as e:
-            logger.error(f"Failed to initialize agent: {e}")
+            logger.error(f"Failed to initialize Gemini AI: {e}")
             return False
     
-    def _initialize_semantic_search(self):
-        """Initialize simple semantic search with TF-IDF"""
+    def categorize_transactions(self, transactions: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Categorize transactions using Gemini AI for inflation analysis"""
+        if not self.initialized or not transactions:
+            return transactions
+        
         try:
-            # Get Houston sources and convert to documents
-            sources = get_default_houston_sources()
-            self.documents = []
-            texts = []
-            
-            for source in sources:
-                # Create document content
-                content = f"""
-                Program: {source.get('name', '')}
-                Description: {source.get('why', '')}
-                Eligibility: {source.get('eligibility', '')}
-                Phone: {source.get('phone', '')}
-                County: {source.get('county', '')}
-                """
-                
-                doc_data = {
-                    'content': content.strip(),
-                    'metadata': {
-                        'name': source.get('name', ''),
-                        'url': source.get('url', ''),
-                        'phone': source.get('phone', ''),
-                        'type': 'financial_assistance'
-                    }
-                }
-                self.documents.append(doc_data)
-                texts.append(content.strip())
-            
-            # Initialize TF-IDF vectorizer if sklearn is available
-            if SKLEARN_AVAILABLE:
-                self.vectorizer = TfidfVectorizer(
-                    stop_words='english',
-                    max_features=1000,
-                    ngram_range=(1, 2)
-                )
-                self.document_vectors = self.vectorizer.fit_transform(texts)
-                logger.info(f"Semantic search initialized with {len(texts)} documents")
-            else:
-                logger.info("Semantic search using keyword fallback")
-            
+            return categorize_transactions(transactions)
         except Exception as e:
-            logger.error(f"Failed to initialize semantic search: {e}")
-            self.vectorizer = None
+            logger.error(f"Error categorizing transactions: {e}")
+            return transactions
     
-    def _create_tools(self) -> List[Tool]:
-        """Create tools for the agent"""
-        tools = []
+    def generate_inflation_insights(self, context: Dict[str, Any], question: str) -> str:
+        """Generate personalized inflation insights using Gemini"""
+        if not self.initialized:
+            return self._fallback_inflation_response(context, question)
         
-        # Semantic search tool
-        tools.append(Tool(
-            name="search_houston_resources",
-            description="Search for relevant Houston/Harris County financial assistance programs based on user needs",
-            func=self._search_houston_resources
-        ))
-        
-        # Budgeting advice tool
-        tools.append(Tool(
-            name="budgeting_advice",
-            description="Provide budgeting advice and financial planning guidance",
-            func=self._provide_budgeting_advice
-        ))
-        
-        # Intent clarification tool  
-        tools.append(Tool(
-            name="clarify_intent",
-            description="Ask clarifying questions to better understand user's specific financial needs",
-            func=self._clarify_intent
-        ))
-        
-        return tools
-    
-    def _search_houston_resources(self, query: str) -> str:
-        """Search for relevant Houston financial resources using semantic search"""
         try:
-            if self.vectorizer is not None and self.document_vectors is not None and SKLEARN_AVAILABLE:
-                # Use TF-IDF semantic search
-                query_vector = self.vectorizer.transform([query])
-                similarities = cosine_similarity(query_vector, self.document_vectors).flatten()
-                
-                # Get top 3 most similar documents
-                top_indices = np.argsort(similarities)[::-1][:3]
-                
-                if len(top_indices) == 0 or similarities[top_indices[0]] < 0.1:
-                    return "No highly relevant Houston financial assistance programs found for your specific query"
-                
-                # Format results
-                response = "I found these relevant Houston financial assistance programs:\n\n"
-                for i, idx in enumerate(top_indices, 1):
-                    if similarities[idx] > 0.1:  # Only include reasonably relevant results
-                        doc = self.documents[idx]
-                        response += f"{i}. {doc['metadata'].get('name', 'Program')}\n"
-                        response += f"   {doc['content'][:200]}...\n"
-                        if doc['metadata'].get('phone'):
-                            response += f"   Phone: {doc['metadata']['phone']}\n"
-                        response += f"   Relevance: {similarities[idx]:.2f}\n\n"
-                
-                return response
-                
-            else:
-                # Fallback to keyword search
-                return self._keyword_search_fallback(query)
-                
+            return build_financial_coach_response(context, question)
         except Exception as e:
-            logger.error(f"Error in semantic search: {e}")
-            return "Error searching resources, please try again"
+            logger.error(f"Error generating inflation insights: {e}")
+            return self._fallback_inflation_response(context, question)
     
-    def _keyword_search_fallback(self, query: str) -> str:
-        """Fallback keyword search when semantic search is not available"""
-        query_lower = query.lower()
-        relevant_docs = []
+    def _fallback_inflation_response(self, context: Dict[str, Any], question: str) -> str:
+        """Fallback response when Gemini is unavailable"""
+        inflation_data = context.get("personal_inflation", {})
+        rate = inflation_data.get("personal_rate")
         
-        for doc in self.documents:
-            content_lower = doc['content'].lower()
-            
-            # Simple keyword matching
-            keywords_found = 0
-            query_words = query_lower.split()
-            
-            for word in query_words:
-                if len(word) > 2 and word in content_lower:
-                    keywords_found += 1
-            
-            if keywords_found > 0:
-                relevant_docs.append((doc, keywords_found))
-        
-        # Sort by number of keyword matches
-        relevant_docs.sort(key=lambda x: x[1], reverse=True)
-        
-        if not relevant_docs:
-            return "No relevant Houston financial assistance programs found for your specific query"
-        
-        # Format results
-        response = "I found these relevant Houston financial assistance programs:\n\n"
-        for i, (doc, score) in enumerate(relevant_docs[:3], 1):
-            response += f"{i}. {doc['metadata'].get('name', 'Program')}\n"
-            response += f"   {doc['content'][:200]}...\n"
-            if doc['metadata'].get('phone'):
-                response += f"   Phone: {doc['metadata']['phone']}\n"
-            response += "\n"
-        
-        return response
-    
-    def _provide_budgeting_advice(self, situation: str) -> str:
-        """Provide budgeting advice based on user's financial situation"""
-        advice = f"""
-        Based on your situation: {situation}
-        
-        Here's some budgeting advice:
-        
-        1. **50/30/20 Rule**: Allocate 50% of income to needs, 30% to wants, 20% to savings
-        2. **Track Expenses**: Monitor where your money goes for 1-2 months
-        3. **Emergency Fund**: Aim for 3-6 months of expenses saved
-        4. **Houston-Specific Tips**:
-           - Look into Harris County utility assistance programs
-           - Consider Houston Metro for affordable transportation
-           - Check local food banks if grocery costs are high
-        
-        Would you like specific help with any particular area of your budget?
-        """
-        return advice.strip()
-    
-    def _build_enhanced_context(self, user_context: Optional[Dict] = None, conversation_history: Optional[List[Dict]] = None) -> Dict:
-        """Build enhanced context from user data and conversation history"""
-        enhanced_context = {
-            "user_location": "Harris County",  # Default to Harris County
-            "household_size": None,
-            "previous_assistance": [],
-            "urgency_level": "normal",
-            "location_verified": False,
-            "income_range": None,
-            "conversation_summary": ""
-        }
-        
-        # Add user context if provided
-        if user_context:
-            enhanced_context.update({
-                "user_location": user_context.get("location", "Harris County"),
-                "household_size": user_context.get("household_size"),
-                "previous_assistance": user_context.get("assistance_history", []),
-                "location_verified": user_context.get("location_verified", False),
-                "income_range": user_context.get("income_range")
-            })
-        
-        # Add conversation context if provided
-        if conversation_history:
-            enhanced_context["conversation_summary"] = self._build_conversation_context(conversation_history)
-            
-        return enhanced_context
-    
-    def _build_conversation_context(self, conversation_history: List[Dict]) -> str:
-        """Build context summary from previous interactions"""
-        if not conversation_history:
-            return ""
-        
-        context_parts = []
-        for interaction in conversation_history[-3:]:  # Last 3 interactions
-            if interaction.get("user_query"):
-                context_parts.append(f"User asked: {interaction['user_query']}")
-            if interaction.get("ai_response"):
-                # Summarize AI response to key points
-                response = interaction["ai_response"]
-                if len(response) > 100:
-                    response = response[:100] + "..."
-                context_parts.append(f"AI responded: {response}")
-        
-        return " | ".join(context_parts)
-    
-    def classify_intent(self, question: str) -> Dict:
-        """Classify user intent more sophisticatedly"""
-        question_lower = question.lower()
-        
-        intents = {
-            "non_financial": {
-                "keywords": ["time", "date", "weather", "hello", "hi", "hi there", "good morning", "good afternoon", "how are you", "what's up", "what time", "current time", "clock", "day", "today's date"],
-                "priority": "low"
-            },
-            "urgent_assistance": {
-                "keywords": ["emergency", "eviction", "evicted", "shut off", "shutoff", "disconnect", "urgent", "immediately", "help now", "tomorrow", "today"],
-                "priority": "high"
-            },
-            "program_search": {
-                "keywords": ["help with", "assistance", "programs", "available", "find", "need help", "what programs", "options"],
-                "priority": "medium"
-            },
-            "application_help": {
-                "keywords": ["apply", "how to", "requirements", "documents", "process", "steps", "application"],
-                "priority": "medium"
-            },
-            "follow_up": {
-                "keywords": ["status", "application", "submitted", "waiting", "approved", "denied", "my application"],
-                "priority": "medium"
-            },
-            "budgeting_help": {
-                "keywords": ["budget", "budgeting", "money management", "financial planning", "expenses", "my budget", "financial tips", "budget tips", "save money", "spending"],
-                "priority": "low"
-            }
-        }
-        
-        detected_intents = []
-        for intent_name, intent_data in intents.items():
-            # Count keyword matches, including partial matches
-            matches = 0
-            for keyword in intent_data["keywords"]:
-                if keyword in question_lower:
-                    matches += 1
-                # Also check for word-level matches for better accuracy
-                for word in question_lower.split():
-                    if word in keyword.split():
-                        matches += 0.5
-            
-            if matches > 0:
-                confidence = min(matches / len(intent_data["keywords"]), 1.0)  # Cap at 1.0
-                detected_intents.append({
-                    "intent": intent_name,
-                    "confidence": confidence,
-                    "priority": intent_data["priority"]
-                })
-        
-        # Sort by confidence
-        detected_intents.sort(key=lambda x: x["confidence"], reverse=True)
-        
-        return {
-            "primary_intent": detected_intents[0] if detected_intents else {"intent": "general_inquiry", "confidence": 0.0, "priority": "low"},
-            "all_intents": detected_intents
-        }
-    
-    def format_response(self, raw_response: Dict, query: str, context: Dict) -> Dict:
-        """Format response with standardized structure"""
-        intent_analysis = self.classify_intent(query)
-        structured = raw_response.get("structured", {})
-        summary_text = raw_response.get(
-            "summary",
-            structured.get("summary", raw_response.get("answer", ""))
-        )
-        steps = raw_response.get(
-            "actionable_steps",
-            structured.get("actionable_steps")
-        ) or self._extract_action_items(summary_text)
-
-        formatted_response = {
-            "answer": summary_text,
-            "title": raw_response.get("title", structured.get("title", "")),
-            "summary": summary_text,
-            "actionable_steps": steps,
-            "action_items": steps,
-            "sources": raw_response.get("sources", structured.get("sources", [])),
-            "provider": raw_response.get("provider", "unknown"),
-            "agent_used": raw_response.get("agent_used", False),
-            "priority_level": intent_analysis["primary_intent"]["priority"],
-            "follow_up_questions": self._generate_clarifying_questions(query, context),
-            "intent_classification": intent_analysis
-        }
-
-        return formatted_response
-    
-    def _extract_action_items(self, answer: str) -> List[str]:
-        """Extract actionable next steps from the response"""
-        action_items = []
-        
-        # Look for numbered lists or bullet points
-        import re
-        
-        # Find numbered steps (1. 2. 3. etc.)
-        numbered_steps = re.findall(r'\d+\.\s*([^\n]+)', answer)
-        action_items.extend(numbered_steps)
-        
-        # Find bullet points (- or • )
-        bullet_points = re.findall(r'[-•]\s*([^\n]+)', answer)
-        action_items.extend(bullet_points)
-        
-        # If no structured actions found, create general ones
-        if not action_items:
-            if "contact" in answer.lower() or "call" in answer.lower():
-                action_items.append("Contact the recommended organizations directly")
-            if "apply" in answer.lower() or "application" in answer.lower():
-                action_items.append("Gather required documents for application")
-            if "eligibility" in answer.lower():
-                action_items.append("Check eligibility requirements")
-        
-        return action_items[:5]  # Limit to 5 action items
-    
-    def _generate_clarifying_questions(self, user_query: str, user_context: Dict = None) -> List[str]:
-        """Generate personalized clarifying questions"""
-        questions = []
-        
-        if not user_context:
-            user_context = {}
-        
-        query_lower = user_query.lower()
-        
-        # Location verification
-        if not user_context.get("location_verified"):
-            questions.append("Are you located in Harris County, Texas?")
-        
-        # Income-related questions for financial assistance
-        if any(keyword in query_lower for keyword in ["financial", "assistance", "help", "support"]) and not user_context.get("income_range"):
-            questions.append("What's your approximate monthly household income range?")
-        
-        # Household size for program eligibility
-        if not user_context.get("household_size") and any(keyword in query_lower for keyword in ["family", "household", "assistance"]):
-            questions.append("How many people are in your household?")
-        
-        # Urgency assessment
-        if any(keyword in query_lower for keyword in ["urgent", "emergency", "immediately", "eviction", "shut off"]):
-            questions.append("Do you have any specific deadlines or urgent situations?")
-        
-        # Previous assistance history
-        if not user_context.get("previous_assistance") and "assistance" in query_lower:
-            questions.append("Have you received financial assistance before?")
-        
-        # Specific type of help
-        if len(query_lower.split()) < 5:  # Short, vague queries
-            questions.append("What specific type of financial assistance do you need? (rent, utilities, food, etc.)")
-        
-        return questions[:3]  # Limit to avoid overwhelming
-    
-    def validate_response(self, response: Dict) -> Dict:
-        """Ensure response quality before returning"""
-        summary = response.get("summary", "")
-
-        if len(summary) < 50:
-            enhanced = self._enhance_short_response(summary, response.get("sources", []))
-            response["summary"] = enhanced
-            response["answer"] = enhanced
-
-        if not response.get("sources"):
-            response["sources"] = get_default_houston_sources()[:3]
-
-        if not self._contains_actionable_steps(summary) and not response.get("actionable_steps"):
-            addl = self._add_next_steps(response.get("intent_classification", {}))
-            response["summary"] += "\n\n" + addl
-            response["answer"] = response["summary"]
-
-        return response
-    
-    def _enhance_short_response(self, answer: str, sources: List[Dict]) -> str:
-        """Enhance short responses with additional helpful information"""
-        if not answer or len(answer.strip()) < 20:
-            answer = "I can help you find financial assistance resources in Houston/Harris County."
-        
-        enhanced = f"{answer}\n\nHere are some helpful resources:\n\n"
-        
-        for i, source in enumerate(sources[:2], 1):
-            enhanced += f"{i}. **{source.get('name', 'Program')}**: {source.get('why', 'Financial assistance')}\n"
-            if source.get('phone'):
-                enhanced += f"   Phone: {source['phone']}\n"
-            enhanced += "\n"
-        
-        return enhanced
-    
-    def _contains_actionable_steps(self, answer: str) -> bool:
-        """Check if response contains actionable steps"""
-        action_indicators = [
-            "contact", "call", "apply", "visit", "go to", "submit", 
-            "gather", "prepare", "check", "verify", "steps:", "next:"
+        fallback_lines = [
+            "Inflate-Wise Analysis:",
+            f"• Your personal inflation rate: {rate}%" if rate is not None else "• Personal inflation rate is being calculated",
         ]
-        answer_lower = answer.lower()
-        return any(indicator in answer_lower for indicator in action_indicators)
-    
-    def _add_next_steps(self, intent_classification: Dict) -> str:
-        """Add general next steps based on intent"""
-        primary_intent = intent_classification.get("primary_intent", {}).get("intent", "general_inquiry")
         
-        if primary_intent == "urgent_assistance":
-            return """**Immediate Next Steps:**
-1. Call 211 for emergency assistance referrals
-2. Contact Harris County Community Services at (832) 927-4400
-3. Visit your local community center for emergency resources"""
+        if inflation_data.get("top_drivers"):
+            fallback_lines.append(f"• Top spending drivers: {', '.join(inflation_data['top_drivers'])}")
         
-        elif primary_intent == "program_search":
-            return """**Next Steps:**
-1. Review the programs listed above and their eligibility requirements
-2. Contact the organizations directly using the phone numbers provided
-3. Gather required documentation (ID, income proof, utility bills)"""
+        if inflation_data.get("spending_by_category"):
+            fallback_lines.append("• Focus on categories with highest inflation impact for savings")
         
-        elif primary_intent == "application_help":
-            return """**Application Steps:**
-1. Check eligibility requirements for each program
-2. Gather required documents (ID, proof of income, utility bills)
-3. Contact the organizations to start the application process"""
+        fallback_lines.append("• Connect your accounts for more detailed analysis")
         
-        else:
-            return """**General Next Steps:**
-1. Contact the recommended organizations for more information
-2. Ask about eligibility requirements and application processes
-3. Prepare necessary documentation in advance"""
-    
-    def _handle_ai_failure(self, question: str, error: Exception) -> Dict:
-        """More intelligent error handling based on error type"""
-        error_str = str(error).lower()
-        
-        if "timeout" in error_str:
-            # Quick resource list for timeout errors
-            return {
-                "answer": "I'm experiencing slow response times. Here are some quick resources while I recover:",
-                "sources": get_default_houston_sources()[:3],
-                "provider": "timeout-fallback",
-                "action_items": ["Contact these organizations directly", "Try your request again in a few minutes"],
-                "priority_level": "medium"
-            }
-        elif "rate" in error_str and "limit" in error_str:
-            # Check for cached response
-            return self._get_cached_response_if_available(question)
-        else:
-            # Emergency contact info for other errors
-            return {
-                "answer": """I'm having technical difficulties right now. For immediate assistance, please contact:
-
-• **Harris County Community Services**: (832) 927-4400
-• **Houston 311**: (713) 837-0311
-• **211 Texas**: Dial 2-1-1 for emergency assistance referrals
-
-I apologize for the inconvenience and recommend trying again later.""",
-                "sources": get_default_houston_sources()[:2],
-                "provider": "emergency-fallback",
-                "action_items": ["Call the numbers above for immediate help", "Try again later"],
-                "priority_level": "high"
-            }
-    
-    def _get_cached_response_if_available(self, question: str) -> Dict:
-        """Provide cached or simplified response for rate limiting"""
-        # Simple implementation - could be enhanced with actual caching
-        return {
-            "answer": "I'm currently rate-limited but here are some general Houston financial assistance resources:",
-            "sources": get_default_houston_sources()[:3],
-            "provider": "rate-limit-fallback",
-            "action_items": ["Contact these organizations directly", "Try your specific question again later"],
-            "priority_level": "medium"
-        }
-
-    def _clarify_intent(self, question: str) -> str:
-        """Ask clarifying questions to better understand user needs"""
-        questions = self._generate_clarifying_questions(question)
-        if not questions:
-            return "Could you provide more details about your financial assistance needs?"
-
-        formatted = "To help you better, could you please clarify:\n\n"
-        for idx, q in enumerate(questions, 1):
-            formatted += f"{idx}. {q}\n"
-        return formatted.strip()
-    
-    def _get_agent_prompt(self) -> "ChatPromptTemplate":
-        """Return a chat prompt template for the tools agent"""
-        system_msg = (
-            "You are a helpful AI assistant specializing in Houston/Harris County financial assistance programs.\n\n"
-            "Your role is to:\n"
-            "1. Help users find relevant financial assistance programs\n"
-            "2. Provide budgeting advice and financial planning guidance\n"
-            "3. Ask clarifying questions when needed to better understand user needs\n"
-            "4. Connect users with appropriate local resources\n\n"
-            "You have access to tools for:\n"
-            "- Searching Houston financial assistance programs\n"
-            "- Providing budgeting advice\n"
-            "- Clarifying user intent\n\n"
-            "Always be empathetic, practical, and focused on actionable next steps.\n"
-            "When recommending programs, include contact information when available."
-        )
-
-        return ChatPromptTemplate.from_messages(
-            [
-                ("system", system_msg),
-                ("human", "{input}"),
-                ("ai", "{agent_scratchpad}"),
-            ]
-        )
-    
-    def process_query(self, query: str, user_context: Optional[Dict] = None, conversation_history: Optional[List[Dict]] = None) -> Dict[str, Any]:
-        """Process a user query using the agent or fallback to basic AI"""
-        try:
-            # Build enhanced context from user data and conversation history
-            enhanced_context = self._build_enhanced_context(user_context, conversation_history)
-            
-            if self.initialized and self.agent_executor:
-                # Use the advanced agent with enhanced context
-                logger.info("Processing query with LangChain agent")
-                context_str = json.dumps(
-                    {k: v for k, v in enhanced_context.items() if v not in (None, "", [], {})}
-                )
-                agent_input = {
-                    "input": f"{query}\n\nContext: {context_str}"
-                }
-                response = self.agent_executor.invoke(agent_input)
-                
-                raw_response = {
-                    "answer": response.get("output", ""),
-                    "sources": self._extract_sources_from_response(response),
-                    "provider": "langchain-agent",
-                    "agent_used": True
-                }
-            else:
-                # Fallback to existing Gemini AI with enhanced context
-                logger.info("Falling back to basic Gemini AI")
-                raw_response = self._fallback_response(query, enhanced_context)
-            
-            # Apply response formatting and validation
-            formatted_response = self.format_response(raw_response, query, enhanced_context)
-            validated_response = self.validate_response(formatted_response)
-            
-            return validated_response
-                
-        except Exception as e:
-            logger.error(f"Error processing query with agent: {e}")
-            return self._handle_ai_failure(query, e)
-    
-    def _fallback_response(self, query: str, user_context: Optional[Dict] = None) -> Dict[str, Any]:
-        """Fallback to existing AI implementation"""
-        response = generate_financial_assistance_response(query, user_context=user_context)
-        response["provider"] = "fallback-gemini"
-        response["agent_used"] = False
-        return response
-    
-    def _extract_sources_from_response(self, response: Dict) -> List[Dict]:
-        """Extract source information from agent response"""
-        # For now, return default sources - could be enhanced to extract from agent response
-        return get_default_houston_sources()[:3]
+        return "\n".join(fallback_lines)
 
 
 # Global agent instance
-@lru_cache(maxsize=1)
-def get_houston_agent() -> HoustonFinancialAgent:
-    """Get or create the global Houston Financial Agent instance"""
-    return HoustonFinancialAgent()
+_agent_instance = None
 
+def get_inflation_agent() -> InflateWiseAgent:
+    """Get or create the global inflation agent instance"""
+    global _agent_instance
+    if _agent_instance is None:
+        _agent_instance = InflateWiseAgent()
+    return _agent_instance
 
-# Convenience function for external use
-def process_financial_query(query: str, user_context: Optional[Dict] = None, conversation_history: Optional[List[Dict]] = None) -> Dict[str, Any]:
-    """Process a financial assistance query using the AI agent"""
-    agent = get_houston_agent()
-    return agent.process_query(query, user_context, conversation_history)
+def process_inflation_query(query: str, user_context: Optional[Dict] = None) -> Dict[str, Any]:
+    """Process an inflation-related query using the InflateWise agent"""
+    agent = get_inflation_agent()
+    
+    try:
+        answer = agent.generate_inflation_insights(user_context or {}, query)
+        
+        return {
+            "answer": answer,
+            "title": "Personal Inflation Analysis",
+            "summary": answer,
+            "actionable_steps": _extract_action_items(answer),
+            "sources": [],
+            "provider": "inflate-wise-agent",
+            "agent_used": True
+        }
+    except Exception as e:
+        logger.error(f"Error processing inflation query: {e}")
+        return {
+            "answer": "I'm experiencing technical difficulties. Please try again or contact support.",
+            "title": "Error",
+            "summary": "Technical error occurred",
+            "actionable_steps": ["Try asking your question again", "Contact support if the issue persists"],
+            "sources": [],
+            "provider": "error-fallback",
+            "agent_used": False
+        }
+
+def _extract_action_items(answer: str) -> List[str]:
+    """Extract actionable insights from the AI response"""
+    action_items = []
+    
+    # Look for numbered lists or bullet points
+    import re
+    
+    # Find numbered steps (1. 2. 3. etc.)
+    numbered_steps = re.findall(r'\d+\.\s*([^\\n]+)', answer)
+    action_items.extend(numbered_steps)
+    
+    # Find bullet points (- or • )
+    bullet_points = re.findall(r'[-•]\s*([^\\n]+)', answer)
+    action_items.extend(bullet_points)
+    
+    # If no structured actions found, create general inflation-focused ones
+    if not action_items:
+        if "inflation" in answer.lower():
+            action_items.append("Monitor your personal inflation rate regularly")
+        if "spending" in answer.lower() or "category" in answer.lower():
+            action_items.append("Review spending categories with highest inflation impact")
+        if "budget" in answer.lower():
+            action_items.append("Adjust budget to account for inflation")
+        
+        # Always include a default action
+        if not action_items:
+            action_items.append("Connect your financial accounts for personalized inflation analysis")
+    
+    return action_items[:5]  # Limit to top 5 actions
+
+# Legacy compatibility function for existing imports
+def process_financial_query(query: str, user_context: Optional[Dict] = None) -> Dict[str, Any]:
+    """Legacy compatibility wrapper - redirects to inflation query processing"""
+    return process_inflation_query(query, user_context)

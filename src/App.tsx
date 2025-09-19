@@ -8,7 +8,7 @@ import RegisterPage from "@/pages/RegisterPage";
 import Onboarding from "@/pages/Onboarding";
 import Dashboard from "@/pages/Dashboard";
 import LandingPage from "@/pages/LandingPage";
-import TrustAgentPage from "@/pages/TrustAgentPage";
+
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { AuthProvider } from "@/context/Auth";
 import { Toaster } from "react-hot-toast";
@@ -52,14 +52,7 @@ export default function App() {
             </ProtectedRoute>
           </Layout>
         } />
-        
-        <Route path="/trustagent" element={
-          <Layout maxWidth="max-w-7xl">
-            <ProtectedRoute>
-              <TrustAgentPage />
-            </ProtectedRoute>
-          </Layout>
-        } />
+
         
         <Route path="/chat" element={
           <Layout>

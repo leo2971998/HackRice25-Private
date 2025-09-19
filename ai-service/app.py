@@ -1,4 +1,4 @@
-# AI Chatbot Microservice
+# Inflate-Wise AI Microservice
 import os
 import sys
 from flask import Flask, request, jsonify
@@ -18,7 +18,7 @@ def create_app():
     
     @app.route('/healthz')
     def healthz():
-        return {"status": "ok", "service": "Houston Financial Navigator AI Service"}, 200
+        return {"status": "ok", "service": "Inflate-Wise AI Service"}, 200
     
     @app.route('/ask', methods=['POST'])
     def ask():
