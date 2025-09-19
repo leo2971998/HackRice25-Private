@@ -62,7 +62,7 @@ export default function App() {
         } />
         
         <Route path="/trustagent" element={
-          <Layout>
+          <Layout maxWidth="max-w-7xl">
             <ProtectedRoute>
               <TrustAgentPage />
             </ProtectedRoute>
