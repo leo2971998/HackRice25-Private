@@ -61,7 +61,7 @@ export default function ChatPage() {
             <MessageCircle className="w-5 h-5 text-primary-400" />
             Ask Inflate-Wise
           </CardTitle>
-          <p className="text-dark-900 text-sm">
+          <p className="text-dark-700 text-sm">
             Gemini analyses your personal inflation data before responding, so answers are grounded in your real numbers.
           </p>
         </CardHeader>
