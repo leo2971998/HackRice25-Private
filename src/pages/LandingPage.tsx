@@ -24,7 +24,7 @@ export default function LandingPage() {
           </p>
           <h1 className="text-4xl md:text-6xl font-bold text-white leading-tight">
             Inflate-Wise
-            <span className="block bg-gradient-to-r from-white via-primary-200 to-accent-emerald text-transparent bg-clip-text">
+            <span className="block text-white">
               Your AI Co-Pilot for Beating Personal Inflation
             </span>
           </h1>
@@ -34,7 +34,7 @@ export default function LandingPage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <button
               onClick={() => navigate("/register")}
-              className="px-8 py-4 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold rounded-lg shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center space-x-2"
+              className="px-8 py-4 bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-lg shadow-lg transform hover:scale-105 transition-all duration-200 flex items-center space-x-2"
             >
               <span>Create an account</span>
               <ArrowRight className="h-5 w-5" />
