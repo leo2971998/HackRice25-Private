@@ -112,3 +112,8 @@ export const submitReceipt = async (items: string[], total: number) => {
   const { data } = await api.post("/uploads/receipt", { items, total });
   return data as { summary: string };
 };
+
+export const getCreditCardRecommendation = async () => {
+  const { data } = await api.post("/assistant/credit-card-recommendation");
+  return data as { recommendation: string; spending_analysis: any; context: any };
+};
