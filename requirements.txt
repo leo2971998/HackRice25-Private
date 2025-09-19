@@ -9,3 +9,4 @@ google-cloud-firestore==2.13.1
 google-generativeai==0.3.2
 plaid-python==17.0.0
 pydantic>=1.10.0
+cpi>=1.0.0

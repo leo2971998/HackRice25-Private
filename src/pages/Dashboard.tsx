@@ -12,8 +12,11 @@ import {
   PlusCircle,
   ShoppingBag,
   X,
+  CreditCard,
+  Link,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { usePlaidLink } from "react-plaid-link";
 
 import {
   fetchTransactions,
@@ -22,6 +25,10 @@ import {
   submitReceipt,
   createManualDeposit,
   createManualPurchase,
+  createPlaidLinkToken,
+  exchangePlaidPublicToken,
+  getPlaidStatus,
+  getCreditCardRecommendation,
   type PersonalInflationSnapshot,
   type TransactionRecord,
 } from "@/api/client";
@@ -64,10 +71,18 @@ export default function Dashboard() {
   const [purchaseDate, setPurchaseDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [purchaseNotes, setPurchaseNotes] = useState("");
   const [purchaseSubmitting, setPurchaseSubmitting] = useState(false);
+  const [plaidLinkToken, setPlaidLinkToken] = useState<string | null>(null);
+  const [plaidLinked, setPlaidLinked] = useState(false);
+  const [creditCardRecommendation, setCreditCardRecommendation] = useState<string | null>(null);
+  const [loadingRecommendation, setLoadingRecommendation] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Skip redirect for demo mode
+    if (window.location.hash === '#demo') {
+      return;
+    }
     if (!user) {
       navigate("/login");
     }
@@ -93,7 +108,68 @@ export default function Dashboard() {
 
   useEffect(() => {
     loadDashboard();
+    checkPlaidStatus();
   }, []);
+
+  const checkPlaidStatus = async () => {
+    try {
+      const status = await getPlaidStatus();
+      setPlaidLinked(status.linked);
+    } catch (error) {
+      console.log("Could not check Plaid status");
+    }
+  };
+
+  const initializePlaidLink = async () => {
+    try {
+      const { link_token } = await createPlaidLinkToken();
+      setPlaidLinkToken(link_token);
+    } catch (error) {
+      toast.error("Failed to initialize Plaid Link");
+    }
+  };
+
+  const onPlaidSuccess = async (public_token: string, metadata: any) => {
+    try {
+      await exchangePlaidPublicToken({
+        public_token,
+        institution: metadata.institution,
+      });
+      toast.success("Bank account linked successfully!");
+      setPlaidLinked(true);
+      await loadDashboard(true);
+    } catch (error) {
+      toast.error("Failed to link bank account");
+    }
+  };
+
+  const onPlaidExit = () => {
+    setPlaidLinkToken(null);
+  };
+
+  const { open, ready } = usePlaidLink({
+    token: plaidLinkToken,
+    onSuccess: onPlaidSuccess,
+    onExit: onPlaidExit,
+  });
+
+  const loadCreditCardRecommendation = async () => {
+    if (!plaidLinked) {
+      toast.error("Please connect your bank account first to get personalized recommendations");
+      return;
+    }
+    
+    setLoadingRecommendation(true);
+    try {
+      const { recommendation } = await getCreditCardRecommendation();
+      setCreditCardRecommendation(recommendation);
+      toast.success("AI credit card recommendation generated!");
+    } catch (error) {
+      toast.error("Failed to generate recommendation. Please try again.");
+    } finally {
+      setLoadingRecommendation(false);
+    }
+  };
 
   const categoryTotals = useMemo(() => inflation?.category_totals || {}, [inflation]);
   const personalRate = inflation?.personal_rate ?? null;
@@ -331,6 +407,92 @@ export default function Dashboard() {
               </div>
             ) : (
               <p className="text-dark-200 text-sm">We are waiting on transactions from your institution.</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Plaid Link Card */}
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card className="bg-dark-200/40 border border-dark-400/60">
+          <CardHeader>
+            <CardTitle className="text-white text-xl flex items-center gap-2">
+              <Link className="w-5 h-5" />
+              Bank Account Connection
+            </CardTitle>
+            <p className="text-white/80 text-sm">Connect your bank account for personalized inflation insights</p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {plaidLinked ? (
+              <div className="flex items-center gap-2 text-green-400">
+                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                <span className="text-sm">Bank account connected</span>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-dark-200 text-sm">
+                  Link your bank account to get real-time transaction data and personalized AI financial insights.
+                </p>
+                <button
+                  onClick={initializePlaidLink}
+                  disabled={!!plaidLinkToken && !ready}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-500 hover:bg-primary-600 text-white text-sm transition disabled:opacity-60"
+                >
+                  <Link className="w-4 h-4" />
+                  Connect Bank Account
+                </button>
+                {plaidLinkToken && (
+                  <button
+                    onClick={() => open()}
+                    disabled={!ready}
+                    className="ml-2 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm transition disabled:opacity-60"
+                  >
+                    {ready ? "Open Plaid Link" : "Loading..."}
+                  </button>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* AI Credit Card Recommender Card */}
+        <Card className="bg-dark-200/40 border border-dark-400/60">
+          <CardHeader>
+            <CardTitle className="text-white text-xl flex items-center gap-2">
+              <CreditCard className="w-5 h-5" />
+              AI Credit Card Recommender
+            </CardTitle>
+            <p className="text-white/80 text-sm">Get personalized credit card recommendations based on your spending</p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {!plaidLinked ? (
+              <p className="text-dark-200 text-sm">
+                Connect your bank account to get AI-powered credit card recommendations based on your spending patterns.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                <button
+                  onClick={loadCreditCardRecommendation}
+                  disabled={loadingRecommendation}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-sm transition disabled:opacity-60"
+                >
+                  {loadingRecommendation ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Sparkles className="w-4 h-4" />
+                  )}
+                  {loadingRecommendation ? "Analyzing..." : "Get AI Recommendation"}
+                </button>
+                
+                {creditCardRecommendation && (
+                  <div className="mt-4 p-4 bg-dark-300/50 rounded-lg border border-dark-400">
+                    <h4 className="text-white font-medium mb-2">🎯 Personalized Recommendation</h4>
+                    <div className="text-sm text-white/90 whitespace-pre-wrap">
+                      {creditCardRecommendation}
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
           </CardContent>
         </Card>

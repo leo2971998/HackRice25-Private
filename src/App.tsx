@@ -7,6 +7,7 @@ import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import Onboarding from "@/pages/Onboarding";
 import Dashboard from "@/pages/Dashboard";
+import DashboardDemo from "@/pages/DashboardDemo";
 import LandingPage from "@/pages/LandingPage";
 
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -50,6 +51,13 @@ export default function App() {
             <ProtectedRoute requiresPlaid>
               <Dashboard />
             </ProtectedRoute>
+          </Layout>
+        } />
+
+        {/* Demo route without protection */}
+        <Route path="/demo" element={
+          <Layout>
+            <DashboardDemo />
           </Layout>
         } />
 
