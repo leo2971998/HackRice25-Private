@@ -21,7 +21,7 @@ export const mySummary = () => api.get("/me/summary").then(r => r.data);
 
 export const listUsers = () => api.get("/auth/users").then(r => r.data);
 
-export const updateUserRole = (userId: number, role: "user" | "admin") =>
+export const updateUserRole = (userId: string, role: "user" | "admin") =>
   api.patch(`/auth/users/${userId}`, { role }).then(r => r.data);
 
-export const deleteUser = (userId: number) => api.delete(`/auth/users/${userId}`).then(r => r.data);
+export const deleteUser = (userId: string) => api.delete(`/auth/users/${userId}`).then(r => r.data);

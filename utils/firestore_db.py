@@ -1,19 +1,48 @@
-# utils/firestore_db.py
+"""Utility helpers for interacting with Google Cloud Firestore."""
+
+import hashlib
 import os
+import time
+from typing import Any, Dict, List, Optional, Tuple
+
 from google.cloud import firestore
 from google.cloud.firestore import Client
 
-def get_firestore_client() -> Client:
-    """Get Firestore client with proper configuration"""
+
+def get_firestore_client() -> Optional[Client]:
+    """Return an initialized Firestore client if configuration is available."""
+
     try:
-        # Initialize Firestore client
-        # In production, this will use the service account from Cloud Run
-        # In development, it will use GOOGLE_APPLICATION_CREDENTIALS or default auth
-        project_id = os.getenv('GOOGLE_CLOUD_PROJECT', 'gen-lang-client-0536110235')
+        project_id = os.getenv("GOOGLE_CLOUD_PROJECT", "gen-lang-client-0536110235")
         return firestore.Client(project=project_id)
-    except Exception as e:
-        print(f"Warning: Could not initialize Firestore client: {e}")
+    except Exception as exc:  # pragma: no cover - defensive for local dev without credentials
+        print(f"Warning: Could not initialize Firestore client: {exc}")
         return None
+
+
+def _user_doc_id(email: str) -> str:
+    """Derive a stable Firestore document ID from an email address."""
+
+    normalized = (email or "").strip().lower().encode("utf-8")
+    return hashlib.sha256(normalized).hexdigest()
+
+
+def _normalize_user_document(data: Dict[str, Any], *, doc_id: Optional[str] = None) -> Dict[str, Any]:
+    """Normalize Firestore user documents for API responses."""
+
+    result = dict(data)
+    if doc_id:
+        result.setdefault("id", doc_id)
+
+    created_at = result.get("created_at")
+    if hasattr(created_at, "timestamp"):
+        # Convert Firestore Timestamp to unix epoch seconds for front-end sorting
+        result["created_at"] = int(created_at.timestamp())
+
+    if not result.get("role"):
+        result["role"] = "user"
+
+    return result
 
 def test_firestore_connection():
     """Test Firestore connection by writing and reading a test document"""
@@ -40,61 +69,114 @@ def test_firestore_connection():
         return False, f"Firestore connection failed: {str(e)}"
 
 # User operations
-def create_user(user_id: str, user_data: dict):
-    """Create a new user in Firestore"""
-    try:
-        db = get_firestore_client()
-        if not db:
-            return False, "Firestore not available"
-        
-        user_ref = db.collection('users').document(user_id)
-        user_ref.set(user_data)
-        return True, "User created successfully"
-    except Exception as e:
-        return False, f"Failed to create user: {str(e)}"
+def create_user(email: str, user_data: Dict[str, Any]) -> Tuple[bool, str]:
+    """Create a new user document.
 
-def get_user(user_id: str):
-    """Get user data from Firestore"""
+    Returns a tuple of (success flag, user_id or error message).
+    """
+
+    db = get_firestore_client()
+    if not db:
+        return False, "Firestore not available"
+
+    doc_id = _user_doc_id(email)
     try:
-        db = get_firestore_client()
-        if not db:
-            return None, "Firestore not available"
-        
-        user_ref = db.collection('users').document(user_id)
-        doc = user_ref.get()
-        
-        if doc.exists:
-            return doc.to_dict(), "User found"
-        else:
+        user_ref = db.collection("users").document(doc_id)
+        if user_ref.get().exists:
+            return False, "email already registered"
+
+        payload = dict(user_data)
+        payload.setdefault("email", email)
+        payload.setdefault("created_at", int(time.time()))
+        user_ref.set(payload)
+        return True, doc_id
+    except Exception as exc:  # pragma: no cover - surface useful error info
+        return False, f"Failed to create user: {exc}"
+
+
+def get_user(user_id: str) -> Tuple[Optional[Dict[str, Any]], str]:
+    """Fetch a user document by ID."""
+
+    db = get_firestore_client()
+    if not db:
+        return None, "Firestore not available"
+
+    try:
+        doc = db.collection("users").document(user_id).get()
+        if not doc.exists:
             return None, "User not found"
-    except Exception as e:
-        return None, f"Failed to get user: {str(e)}"
+        return _normalize_user_document(doc.to_dict(), doc_id=doc.id), "User found"
+    except Exception as exc:  # pragma: no cover
+        return None, f"Failed to get user: {exc}"
 
-def update_user(user_id: str, user_data: dict):
-    """Update user data in Firestore"""
+
+def get_user_by_email(email: str) -> Tuple[Optional[Dict[str, Any]], str]:
+    """Fetch a user document by email address."""
+
+    db = get_firestore_client()
+    if not db:
+        return None, "Firestore not available"
+
+    doc_id = _user_doc_id(email)
     try:
-        db = get_firestore_client()
-        if not db:
-            return False, "Firestore not available"
-        
-        user_ref = db.collection('users').document(user_id)
+        doc = db.collection("users").document(doc_id).get()
+        if not doc.exists:
+            return None, "User not found"
+        return _normalize_user_document(doc.to_dict(), doc_id=doc.id), "User found"
+    except Exception as exc:  # pragma: no cover
+        return None, f"Failed to get user: {exc}"
+
+
+def list_user_documents() -> Tuple[List[Dict[str, Any]], str]:
+    """Return all user documents."""
+
+    db = get_firestore_client()
+    if not db:
+        return [], "Firestore not available"
+
+    try:
+        docs = db.collection("users").stream()
+        users: List[Dict[str, Any]] = []
+        for doc in docs:
+            users.append(_normalize_user_document(doc.to_dict(), doc_id=doc.id))
+        users.sort(key=lambda item: item.get("created_at", 0), reverse=True)
+        return users, "Users listed"
+    except Exception as exc:  # pragma: no cover
+        return [], f"Failed to list users: {exc}"
+
+
+def update_user(user_id: str, user_data: Dict[str, Any]) -> Tuple[bool, str]:
+    """Update a user document."""
+
+    db = get_firestore_client()
+    if not db:
+        return False, "Firestore not available"
+
+    try:
+        user_ref = db.collection("users").document(user_id)
+        if not user_ref.get().exists:
+            return False, "User not found"
         user_ref.update(user_data)
         return True, "User updated successfully"
-    except Exception as e:
-        return False, f"Failed to update user: {str(e)}"
+    except Exception as exc:  # pragma: no cover
+        return False, f"Failed to update user: {exc}"
 
-def delete_user(user_id: str):
-    """Delete user data from Firestore"""
+
+def delete_user(user_id: str) -> Tuple[bool, str]:
+    """Delete a user document."""
+
+    db = get_firestore_client()
+    if not db:
+        return False, "Firestore not available"
+
     try:
-        db = get_firestore_client()
-        if not db:
-            return False, "Firestore not available"
-        
-        user_ref = db.collection('users').document(user_id)
+        user_ref = db.collection("users").document(user_id)
+        if not user_ref.get().exists:
+            return False, "User not found"
         user_ref.delete()
         return True, "User deleted successfully"
-    except Exception as e:
-        return False, f"Failed to delete user: {str(e)}"
+    except Exception as exc:  # pragma: no cover
+        return False, f"Failed to delete user: {exc}"
 
 # Chat Sessions operations
 def create_chat_session(session_id: str, session_data: dict):

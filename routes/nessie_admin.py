@@ -5,8 +5,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 import os
-from flask import Blueprint, jsonify, request, g
-from .auth import require_auth, require_admin, db
+from flask import Blueprint, jsonify, request
+from .auth import require_admin
 BASE = os.getenv("NESSIE_BASE", "https://api.nessieisreal.com")
 API_KEY = os.environ["NESSIE_API_KEY"]  # set in Cloud Run/locally
 

@@ -4,7 +4,7 @@ import { useAuth } from "@/context/Auth";
 import toast from "react-hot-toast";
 
 interface ManagedUser {
-  id: number;
+  id: string;
   email: string;
   first_name?: string;
   last_name?: string;
@@ -15,8 +15,8 @@ interface ManagedUser {
 export default function AdminPortalPage() {
   const [users, setUsers] = useState<ManagedUser[]>([]);
   const [loading, setLoading] = useState(true);
-  const [savingId, setSavingId] = useState<number | null>(null);
-  const [removingId, setRemovingId] = useState<number | null>(null);
+  const [savingId, setSavingId] = useState<string | null>(null);
+  const [removingId, setRemovingId] = useState<string | null>(null);
   const { user } = useAuth();
 
   const loadUsers = async () => {
@@ -36,7 +36,7 @@ export default function AdminPortalPage() {
     loadUsers();
   }, []);
 
-  const handleRoleChange = async (userId: number, role: "user" | "admin") => {
+  const handleRoleChange = async (userId: string, role: "user" | "admin") => {
     try {
       setSavingId(userId);
       await updateUserRole(userId, role);
@@ -48,8 +48,7 @@ export default function AdminPortalPage() {
       setSavingId(null);
     }
   };
-
-  const handleDelete = async (userId: number) => {
+  const handleDelete = async (userId: string) => {
     try {
       setRemovingId(userId);
       await deleteUser(userId);
