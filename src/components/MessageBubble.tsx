@@ -23,7 +23,7 @@ export default function MessageBubble({ role, children }: { role: "user" | "bot"
       <div className={`max-w-[70%] rounded-2xl px-4 py-3 text-sm shadow-sm ${
         isUser 
           ? "bg-blue-600 text-white rounded-tr-md whitespace-pre-wrap" 
-          : "bg-white border border-gray-200 text-gray-900 rounded-tl-md"
+          : "bg-white border border-gray-200 text-black rounded-tl-md"
       }`}>
         {isUser ? (
           // User messages: render as plain text with whitespace preservation
