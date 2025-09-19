@@ -2,12 +2,12 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/Auth";
 import { useNavigate } from "react-router-dom";
-import { 
-  Shield, 
-  Zap, 
-  Target, 
-  AlertTriangle, 
-  DollarSign, 
+import {
+  Shield,
+  Zap,
+  Target,
+  AlertTriangle,
+  DollarSign,
   TrendingUp,
   Bot,
   Lock,
@@ -17,6 +17,8 @@ import {
   Settings
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { approveMandate, cancelMandate, executeMandate } from "@/api/client";
+import { SkeletonGroup } from "@/components/Skeleton";
 
 interface AP2Mandate {
   id: string;
@@ -62,30 +64,29 @@ export default function TrustAgentPage() {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      
-      // Load AP2 mandates
-      const mandatesResponse = await fetch("/api/ap2/mandates", {
-        credentials: "include"
-      });
-      
-      if (mandatesResponse.ok) {
-        const mandatesData = await mandatesResponse.json();
-        setMandates(mandatesData.mandates || []);
+
+      const [mandatesResponse, statsResponse] = await Promise.all([
+        fetch("/api/ap2/mandates", { credentials: "include" }),
+        fetch("/api/smart-finance/dashboard", { credentials: "include" })
+      ]);
+
+      if (!mandatesResponse.ok) {
+        const errorData = await mandatesResponse.json().catch(() => ({}));
+        throw new Error(errorData.error || "Unable to load mandates");
       }
 
-      // Load smart finance dashboard
-      const statsResponse = await fetch("/api/smart-finance/dashboard", {
-        credentials: "include"
-      });
-      
-      if (statsResponse.ok) {
-        const statsData = await statsResponse.json();
-        setStats(statsData);
+      if (!statsResponse.ok) {
+        const errorData = await statsResponse.json().catch(() => ({}));
+        throw new Error(errorData.error || "Unable to load insights");
       }
-      
-    } catch (error) {
-      console.error("Failed to load TrustAgent dashboard:", error);
-      toast.error("Failed to load dashboard data");
+
+      const mandatesData = await mandatesResponse.json();
+      const statsData = await statsResponse.json();
+
+      setMandates(mandatesData.mandates || []);
+      setStats(statsData);
+    } catch (error: any) {
+      toast.error(error?.message || "Failed to load dashboard data");
     } finally {
       setLoading(false);
     }
@@ -111,8 +112,8 @@ export default function TrustAgentPage() {
       } else {
         throw new Error("Failed to create savings goal");
       }
-    } catch (error) {
-      toast.error("Failed to create savings goal");
+    } catch (error: any) {
+      toast.error(error?.message || "Failed to create savings goal");
     }
   };
 
@@ -135,105 +136,149 @@ export default function TrustAgentPage() {
       } else {
         throw new Error("Failed to create budget alert");
       }
-    } catch (error) {
-      toast.error("Failed to create budget alert");
+    } catch (error: any) {
+      toast.error(error?.message || "Failed to create budget alert");
+    }
+  };
+
+  const handleApprove = async (mandateId: string) => {
+    try {
+      const response = await approveMandate(mandateId);
+      if (response.success) {
+        toast.success(response.message || "Mandate approved");
+        await loadDashboardData();
+      } else {
+        throw new Error(response.message || "Approval failed");
+      }
+    } catch (error: any) {
+      toast.error(error?.response?.data?.error || error?.message || "Unable to approve mandate");
+    }
+  };
+
+  const handleExecute = async (mandateId: string) => {
+    try {
+      const response = await executeMandate(mandateId);
+      if (response.success) {
+        toast.success(response.message || "Mandate executed");
+        await loadDashboardData();
+      } else {
+        throw new Error(response.message || response.execution_result?.error || "Execution failed");
+      }
+    } catch (error: any) {
+      toast.error(error?.response?.data?.error || error?.message || "Unable to execute mandate");
+    }
+  };
+
+  const handleCancel = async (mandateId: string) => {
+    try {
+      const response = await cancelMandate(mandateId);
+      if (response.success) {
+        toast.success(response.message || "Mandate cancelled");
+        await loadDashboardData();
+      } else {
+        throw new Error(response.message || "Cancellation failed");
+      }
+    } catch (error: any) {
+      toast.error(error?.response?.data?.error || error?.message || "Unable to cancel mandate");
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "executed":
-        return <CheckCircle className="h-5 w-5 text-green-500" />;
+        return <CheckCircle className="h-5 w-5 text-emerald-400" />;
       case "approved":
-        return <Zap className="h-5 w-5 text-blue-500" />;
+        return <Zap className="h-5 w-5 text-primary-400" />;
       case "pending":
-        return <Clock className="h-5 w-5 text-yellow-500" />;
+        return <Clock className="h-5 w-5 text-accent-gold" />;
       default:
-        return <AlertTriangle className="h-5 w-5 text-gray-400" />;
+        return <AlertTriangle className="h-5 w-5 text-dark-700" />;
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case "high":
-        return "text-red-600 bg-red-50 border-red-200";
+        return "text-accent-red bg-accent-red/10 border-accent-red/30";
       case "medium":
-        return "text-yellow-600 bg-yellow-50 border-yellow-200";
+        return "text-accent-gold bg-accent-gold/10 border-accent-gold/30";
       case "positive":
-        return "text-green-600 bg-green-50 border-green-200";
+        return "text-emerald-300 bg-emerald-500/10 border-emerald-500/20";
       default:
-        return "text-blue-600 bg-blue-50 border-blue-200";
+        return "text-primary-300 bg-primary-500/10 border-primary-500/20";
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-dark-100 flex items-center justify-center px-4">
+        <div className="w-full max-w-4xl bg-dark-200 border border-dark-400 rounded-2xl shadow-xl p-8">
+          <SkeletonGroup count={6} itemClassName="h-16 w-full bg-dark-300/70" />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="w-full">
-        
+    <div className="min-h-screen bg-dark-100 text-white">
+      <div className="w-full space-y-8">
+
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-4">
-            <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl">
+            <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-primary-500 to-primary-600 rounded-xl">
               <Bot className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-black">TrustAgent</h1>
-              <p className="text-black">Your AP2-Powered Financial Co-Pilot</p>
+              <h1 className="text-3xl font-bold text-white">TrustAgent</h1>
+              <p className="text-dark-900">Your AP2-Powered Financial Co-Pilot</p>
             </div>
           </div>
-          
+
           {/* Quick Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+            <div className="bg-dark-200 rounded-xl p-6 shadow-lg border border-dark-400">
               <div className="flex items-center gap-3">
-                <Shield className="h-8 w-8 text-blue-600" />
+                <Shield className="h-8 w-8 text-primary-500" />
                 <div>
-                  <p className="text-sm font-medium text-black">Active Mandates</p>
-                  <p className="text-2xl font-bold text-black">
+                  <p className="text-sm font-medium text-dark-900">Active Mandates</p>
+                  <p className="text-2xl font-bold text-white">
                     {stats?.active_mandates || 0}
                   </p>
                 </div>
               </div>
             </div>
-            
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+
+            <div className="bg-dark-200 rounded-xl p-6 shadow-lg border border-dark-400">
               <div className="flex items-center gap-3">
-                <Zap className="h-8 w-8 text-green-600" />
+                <Zap className="h-8 w-8 text-emerald-500" />
                 <div>
-                  <p className="text-sm font-medium text-black">Automations</p>
-                  <p className="text-2xl font-bold text-black">
+                  <p className="text-sm font-medium text-dark-900">Automations</p>
+                  <p className="text-2xl font-bold text-white">
                     {stats?.ap2_stats?.active_automations || 0}
                   </p>
                 </div>
               </div>
             </div>
-            
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+
+            <div className="bg-dark-200 rounded-xl p-6 shadow-lg border border-dark-400">
               <div className="flex items-center gap-3">
-                <Target className="h-8 w-8 text-purple-600" />
+                <Target className="h-8 w-8 text-purple-400" />
                 <div>
-                  <p className="text-sm font-medium text-black">Total Mandates</p>
-                  <p className="text-2xl font-bold text-black">
+                  <p className="text-sm font-medium text-dark-900">Total Mandates</p>
+                  <p className="text-2xl font-bold text-white">
                     {stats?.ap2_stats?.total_mandates || 0}
                   </p>
                 </div>
               </div>
             </div>
-            
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+
+            <div className="bg-dark-200 rounded-xl p-6 shadow-lg border border-dark-400">
               <div className="flex items-center gap-3">
-                <Lock className="h-8 w-8 text-orange-600" />
+                <Lock className="h-8 w-8 text-accent-gold" />
                 <div>
-                  <p className="text-sm font-medium text-black">Pending</p>
-                  <p className="text-2xl font-bold text-black">
+                  <p className="text-sm font-medium text-dark-900">Pending</p>
+                  <p className="text-2xl font-bold text-white">
                     {stats?.ap2_stats?.pending_approvals || 0}
                   </p>
                 </div>
@@ -246,39 +291,39 @@ export default function TrustAgentPage() {
           
           {/* AI Insights */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-              <h2 className="text-xl font-semibold text-black mb-4 flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-blue-600" />
+            <div className="bg-dark-200 rounded-xl shadow-lg border border-dark-400 p-6 mb-6">
+              <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-primary-500" />
                 AI Financial Insights
               </h2>
-              
+
               {stats?.insights && stats.insights.length > 0 ? (
                 <div className="space-y-3">
                   {stats.insights.map((insight, index) => (
-                    <div 
+                    <div
                       key={index}
                       className={`p-4 rounded-lg border ${getPriorityColor(insight.priority)}`}
                     >
-                      <p className="font-medium mb-1">{insight.message}</p>
-                      <p className="text-sm opacity-75">{insight.action}</p>
+                      <p className="font-medium mb-1 text-white">{insight.message}</p>
+                      <p className="text-sm text-dark-900">{insight.action}</p>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-black">No insights available. Start by creating some mandates!</p>
+                <p className="text-dark-900">No insights available. Start by creating some mandates!</p>
               )}
             </div>
 
             {/* AP2 Mandates */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <div className="bg-dark-200 rounded-xl shadow-lg border border-dark-400 p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-black flex items-center gap-2">
-                  <Shield className="h-5 w-5 text-blue-600" />
+                <h2 className="text-xl font-semibold text-white flex items-center gap-2">
+                  <Shield className="h-5 w-5 text-primary-500" />
                   AP2 Mandates
                 </h2>
                 <button
                   onClick={() => setShowCreateMandate(!showCreateMandate)}
-                  className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
                 >
                   <Plus className="h-4 w-4" />
                   Create Mandate
@@ -286,19 +331,19 @@ export default function TrustAgentPage() {
               </div>
 
               {showCreateMandate && (
-                <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                  <h3 className="font-medium text-black mb-3">Quick Actions</h3>
+                <div className="mb-6 p-4 bg-dark-300/60 rounded-lg border border-dark-400">
+                  <h3 className="font-medium text-white mb-3">Quick Actions</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <button
                       onClick={createSavingsGoal}
-                      className="flex items-center gap-2 p-3 bg-green-100 text-green-800 rounded-lg hover:bg-green-200 transition-colors"
+                      className="flex items-center gap-2 p-3 bg-emerald-500/10 text-emerald-300 rounded-lg hover:bg-emerald-500/20 transition-colors"
                     >
                       <Target className="h-4 w-4" />
                       Auto-Save $500/month
                     </button>
                     <button
                       onClick={createBudgetAlert}
-                      className="flex items-center gap-2 p-3 bg-yellow-100 text-yellow-800 rounded-lg hover:bg-yellow-200 transition-colors"
+                      className="flex items-center gap-2 p-3 bg-accent-gold/10 text-accent-gold rounded-lg hover:bg-accent-gold/20 transition-colors"
                     >
                       <AlertTriangle className="h-4 w-4" />
                       Budget Alert ($400 dining)
@@ -306,43 +351,82 @@ export default function TrustAgentPage() {
                   </div>
                 </div>
               )}
-              
+
               {mandates.length > 0 ? (
                 <div className="space-y-3">
                   {mandates.slice(0, 5).map((mandate) => (
-                    <div key={mandate.id} className="p-4 border border-gray-200 rounded-lg">
+                    <div key={mandate.id} className="p-4 border border-dark-400 rounded-lg bg-dark-300/60">
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
                           {getStatusIcon(mandate.status)}
-                          <span className="font-medium text-black capitalize">
+                          <span className="font-medium text-white capitalize">
                             {mandate.type} Mandate
                           </span>
                         </div>
                         <span className={`px-2 py-1 text-xs rounded-full font-medium ${
-                          mandate.status === 'executed' ? 'bg-green-100 text-green-800' :
-                          mandate.status === 'approved' ? 'bg-blue-100 text-blue-800' :
-                          mandate.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-gray-100 text-gray-800'
+                          mandate.status === 'executed' ? 'bg-emerald-500/20 text-emerald-300' :
+                          mandate.status === 'approved' ? 'bg-primary-500/20 text-primary-300' :
+                          mandate.status === 'pending' ? 'bg-accent-gold/20 text-accent-gold' :
+                          'bg-dark-400 text-dark-900'
                         }`}>
                           {mandate.status}
                         </span>
                       </div>
-                      
-                      <div className="text-sm text-black">
+
+                      <div className="text-sm text-dark-900 space-y-1">
                         <p><strong>Intent:</strong> {mandate.data?.intent_type || mandate.data?.purpose || "Financial automation"}</p>
                         {mandate.data?.amount && (
                           <p><strong>Amount:</strong> ${mandate.data.amount}</p>
                         )}
                         <p><strong>Created:</strong> {new Date(mandate.created_at).toLocaleDateString()}</p>
+                        {!mandate.is_valid && <p className="text-accent-red text-xs">Signature could not be verified</p>}
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-2 mt-4">
+                        {mandate.status === "pending" && (
+                          <>
+                            <button
+                              onClick={() => handleApprove(mandate.id)}
+                              className="px-3 py-2 text-xs font-semibold bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors"
+                            >
+                              Approve
+                            </button>
+                            <button
+                              onClick={() => handleCancel(mandate.id)}
+                              className="px-3 py-2 text-xs font-semibold bg-accent-red text-white rounded-lg hover:bg-red-600 transition-colors"
+                            >
+                              Cancel
+                            </button>
+                          </>
+                        )}
+                        {mandate.status === "approved" && (
+                          <>
+                            <button
+                              onClick={() => handleExecute(mandate.id)}
+                              className="px-3 py-2 text-xs font-semibold bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+                            >
+                              Execute
+                            </button>
+                            <button
+                              onClick={() => handleCancel(mandate.id)}
+                              className="px-3 py-2 text-xs font-semibold bg-accent-red text-white rounded-lg hover:bg-red-600 transition-colors"
+                            >
+                              Cancel
+                            </button>
+                          </>
+                        )}
+                        {mandate.status === "executed" && (
+                          <span className="text-xs text-emerald-300 font-semibold">Automation complete</span>
+                        )}
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <Shield className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-                  <p className="text-black mb-4">No AP2 mandates yet</p>
-                  <p className="text-sm text-black">Create your first mandate to start autonomous financial management</p>
+                  <Shield className="h-12 w-12 text-dark-700 mx-auto mb-3" />
+                  <p className="text-dark-900 mb-4">No AP2 mandates yet</p>
+                  <p className="text-sm text-dark-900">Create your first mandate to start autonomous financial management</p>
                 </div>
               )}
             </div>
@@ -350,76 +434,76 @@ export default function TrustAgentPage() {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            
+
             {/* AP2 Features */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-black mb-4 flex items-center gap-2">
-                <Bot className="h-5 w-5 text-blue-600" />
+            <div className="bg-dark-200 rounded-xl shadow-lg border border-dark-400 p-6">
+              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <Bot className="h-5 w-5 text-primary-500" />
                 AP2 Features
               </h3>
-              
+
               <div className="space-y-3">
-                <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
-                  <Shield className="h-5 w-5 text-blue-600" />
+                <div className="flex items-center gap-3 p-3 bg-primary-500/10 rounded-lg">
+                  <Shield className="h-5 w-5 text-primary-400" />
                   <div>
-                    <p className="font-medium text-black">Secure Mandates</p>
-                    <p className="text-xs text-black">Cryptographically signed</p>
+                    <p className="font-medium text-white">Secure Mandates</p>
+                    <p className="text-xs text-dark-900">Cryptographically signed</p>
                   </div>
                 </div>
-                
-                <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
-                  <Zap className="h-5 w-5 text-green-600" />
+
+                <div className="flex items-center gap-3 p-3 bg-emerald-500/10 rounded-lg">
+                  <Zap className="h-5 w-5 text-emerald-400" />
                   <div>
-                    <p className="font-medium text-black">Auto-Execution</p>
-                    <p className="text-xs text-black">Autonomous operations</p>
+                    <p className="font-medium text-white">Auto-Execution</p>
+                    <p className="text-xs text-dark-900">Autonomous operations</p>
                   </div>
                 </div>
-                
-                <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
-                  <Target className="h-5 w-5 text-purple-600" />
+
+                <div className="flex items-center gap-3 p-3 bg-purple-500/10 rounded-lg">
+                  <Target className="h-5 w-5 text-purple-300" />
                   <div>
-                    <p className="font-medium text-black">Smart Goals</p>
-                    <p className="text-xs text-black">AI-powered recommendations</p>
+                    <p className="font-medium text-white">Smart Goals</p>
+                    <p className="text-xs text-dark-900">AI-powered recommendations</p>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Quick Actions */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-black mb-4 flex items-center gap-2">
-                <Settings className="h-5 w-5 text-gray-600" />
+            <div className="bg-dark-200 rounded-xl shadow-lg border border-dark-400 p-6">
+              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <Settings className="h-5 w-5 text-dark-900" />
                 Quick Actions
               </h3>
-              
+
               <div className="space-y-2">
-                <button 
+                <button
                   onClick={() => nav("/dashboard")}
-                  className="w-full text-left p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="w-full text-left p-3 rounded-lg hover:bg-dark-300/70 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <DollarSign className="h-4 w-4 text-blue-600" />
-                    <span className="text-sm font-medium">View Dashboard</span>
+                    <DollarSign className="h-4 w-4 text-primary-500" />
+                    <span className="text-sm font-medium text-white">View Dashboard</span>
                   </div>
                 </button>
-                
-                <button 
+
+                <button
                   onClick={() => nav("/chat")}
-                  className="w-full text-left p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="w-full text-left p-3 rounded-lg hover:bg-dark-300/70 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <Bot className="h-4 w-4 text-green-600" />
-                    <span className="text-sm font-medium">AI Assistant</span>
+                    <Bot className="h-4 w-4 text-emerald-400" />
+                    <span className="text-sm font-medium text-white">AI Assistant</span>
                   </div>
                 </button>
-                
-                <button 
+
+                <button
                   onClick={() => nav("/learn")}
-                  className="w-full text-left p-3 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="w-full text-left p-3 rounded-lg hover:bg-dark-300/70 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <Target className="h-4 w-4 text-purple-600" />
-                    <span className="text-sm font-medium">Financial Learning</span>
+                    <Target className="h-4 w-4 text-purple-400" />
+                    <span className="text-sm font-medium text-white">Financial Learning</span>
                   </div>
                 </button>
               </div>

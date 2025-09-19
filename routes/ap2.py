@@ -5,11 +5,12 @@ Handles mandate creation, approval, and execution for autonomous financial opera
 """
 
 import os
+from datetime import datetime
 from flask import Blueprint, request, jsonify, g
 from .auth import require_auth
 from utils.ap2_protocol import ap2_protocol, MandateType, MandateStatus
 from utils.firestore_db import (
-    create_ap2_transaction, get_ap2_transaction, update_ap2_transaction, 
+    create_ap2_transaction, get_ap2_transaction, update_ap2_transaction,
     get_user_ap2_transactions, delete_ap2_transaction
 )
 
@@ -281,6 +282,13 @@ def approve_mandate(mandate_id):
             return jsonify({"error": "Access denied"}), 403
         
         if ap2_protocol.approve_mandate(mandate_id):
+            update_ap2_transaction(
+                mandate_id,
+                {
+                    "status": mandate.status.value,
+                    "approved_at": datetime.utcnow().isoformat()
+                }
+            )
             return jsonify({
                 "success": True,
                 "mandate": mandate.to_dict(),
@@ -307,8 +315,16 @@ def execute_mandate(mandate_id):
             return jsonify({"error": "Access denied"}), 403
         
         result = ap2_protocol.execute_mandate(mandate_id)
-        
+
         if result.get("success"):
+            update_ap2_transaction(
+                mandate_id,
+                {
+                    "status": mandate.status.value,
+                    "executed_at": datetime.utcnow().isoformat(),
+                    "execution_result": result
+                }
+            )
             return jsonify({
                 "success": True,
                 "mandate": mandate.to_dict(),
@@ -338,6 +354,13 @@ def cancel_mandate(mandate_id):
             return jsonify({"error": "Access denied"}), 403
         
         if mandate.cancel():
+            update_ap2_transaction(
+                mandate_id,
+                {
+                    "status": mandate.status.value,
+                    "cancelled_at": datetime.utcnow().isoformat()
+                }
+            )
             return jsonify({
                 "success": True,
                 "mandate": mandate.to_dict(),

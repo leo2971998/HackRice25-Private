@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { me, seed } from "@/api/auth";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/Auth";
+import toast from "react-hot-toast";
 
 export default function Onboarding() {
   const [busy, setBusy] = useState(false);
@@ -23,8 +24,9 @@ export default function Onboarding() {
       const updatedUser = await me();
       setUser(updatedUser);
       nav("/dashboard");
-    } catch (error) {
-      console.error("Setup failed:", error);
+      toast.success("Demo account created successfully");
+    } catch (error: any) {
+      toast.error(error?.response?.data?.error || "Setup failed. Please try again.");
     } finally {
       setBusy(false);
     }
