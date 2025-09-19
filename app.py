@@ -2,6 +2,7 @@ import pkgutil
 import importlib.util
 import sys
 
+
 def get_loader(name):
     if name == "__main__":
         class MainLoader:
@@ -14,57 +15,58 @@ def get_loader(name):
         return None
     return spec.loader if spec else None
 
+
 pkgutil.get_loader = get_loader
 from dotenv import load_dotenv
 load_dotenv()
 
 import time
-from flask import Flask, make_response, request
+from flask import Flask, request
 from flask_cors import CORS
 
 from routes.auth import bp as auth_bp
-from routes.nessie_admin import bp as nessie_admin_bp
-from routes.me_nessie import bp as me_nessie_bp
-from routes.demo import bp as demo_bp
-from routes.chat import bp as chat_bp
-from routes.ap2 import bp as ap2_bp
-from routes.smart_finance import bp as smart_finance_bp
-from routes.firestore_portal import bp as firestore_portal_bp
+from routes.plaid import bp as plaid_bp
+from routes.transactions import bp as transactions_bp
+from routes.inflation import bp as inflation_bp
+from routes.assistant import bp as assistant_bp
+from routes.uploads import bp as uploads_bp
+
 
 def create_app():
     app = Flask(__name__)
-    # allow your dev frontend to send cookies
-    CORS(app, supports_credentials=True, resources={r"/*": {"origins": ["http://localhost:5173","http://localhost:3000"]}})
-    
-    # Add caching middleware for GET requests (120s cache)
+    CORS(app, supports_credentials=True, resources={r"/*": {"origins": ["http://localhost:5173", "http://localhost:3000"]}})
+
     @app.after_request
     def add_cache_headers(response):
         if request.method == "GET" and response.status_code == 200:
-            # Cache GET requests for 120 seconds
             response.headers['Cache-Control'] = 'public, max-age=120'
-            response.headers['Expires'] = time.strftime('%a, %d %b %Y %H:%M:%S GMT', 
-                                                      time.gmtime(time.time() + 120))
+            response.headers['Expires'] = time.strftime(
+                '%a, %d %b %Y %H:%M:%S GMT',
+                time.gmtime(time.time() + 120)
+            )
         return response
-    
+
     app.register_blueprint(auth_bp)
-    app.register_blueprint(nessie_admin_bp)
-    app.register_blueprint(me_nessie_bp)
-    app.register_blueprint(demo_bp)
-    app.register_blueprint(chat_bp)
-    app.register_blueprint(ap2_bp)
-    app.register_blueprint(smart_finance_bp)
-    app.register_blueprint(firestore_portal_bp)
+    app.register_blueprint(plaid_bp)
+    app.register_blueprint(transactions_bp)
+    app.register_blueprint(inflation_bp)
+    app.register_blueprint(assistant_bp)
+    app.register_blueprint(uploads_bp)
 
     @app.get("/healthz")
-    def healthz(): return "ok", 200
-    
+    def healthz():
+        return "ok", 200
+
     return app
+
 
 app = create_app()
 
+
 @app.route("/")
 def health_check():
-    return {"status": "ok", "message": "Houston Financial Navigator API"}
+    return {"status": "ok", "message": "Inflate-Wise API"}
+
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=8000)

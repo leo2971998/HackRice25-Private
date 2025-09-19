@@ -7,8 +7,9 @@ type User = {
   email: string;
   first_name?: string;
   last_name?: string;
-  nessie_customer_id?: string;
   role?: string;
+  plaid_item_id?: string | null;
+  plaid_institution?: Record<string, unknown> | null;
 } | null;
 
 const Ctx = createContext<{

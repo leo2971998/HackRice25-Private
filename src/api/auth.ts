@@ -1,4 +1,3 @@
-// src/api/auth.ts
 import { api } from "./client";
 
 export const register = (body: {
@@ -14,10 +13,6 @@ export const login = (body: { email: string; password: string }) =>
 export const logout = () => api.post("/auth/logout").then(r => r.data);
 
 export const me = () => api.get("/me").then(r => r.data);
-
-export const seed = () => api.post("/me/seed").then(r => r.data);
-
-export const mySummary = () => api.get("/me/summary").then(r => r.data);
 
 export const listUsers = () => api.get("/auth/users").then(r => r.data);
 

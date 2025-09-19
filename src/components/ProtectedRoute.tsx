@@ -6,11 +6,11 @@ import { Skeleton, SkeletonGroup } from "./Skeleton";
 
 interface ProtectedRouteProps {
   children: ReactNode;
-  requiresNessie?: boolean;
+  requiresPlaid?: boolean;
   requiresAdmin?: boolean;
 }
 
-export default function ProtectedRoute({ children, requiresNessie = false, requiresAdmin = false }: ProtectedRouteProps) {
+export default function ProtectedRoute({ children, requiresPlaid = false, requiresAdmin = false }: ProtectedRouteProps) {
   const { user, loading } = useAuth();
 
   if (loading) {
@@ -32,7 +32,7 @@ export default function ProtectedRoute({ children, requiresNessie = false, requi
     return <Navigate to="/login" replace />;
   }
 
-  if (requiresNessie && !user.nessie_customer_id) {
+  if (requiresPlaid && !user.plaid_item_id) {
     return <Navigate to="/onboarding" replace />;
   }
 
