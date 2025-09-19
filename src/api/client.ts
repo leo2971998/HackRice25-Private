@@ -1,145 +1,91 @@
 import axios from "axios";
-import type { ChatMsg, Source } from "@/lib/types";
 
-const baseURL = import.meta.env.VITE_API_BASE || "http://localhost:8000"; // direct backend in dev
+const baseURL = import.meta.env.VITE_API_BASE || "http://localhost:8000";
 
 export const api = axios.create({
   baseURL,
-  withCredentials: true, // allow cookies for authentication
-  timeout: 15000,
+  withCredentials: true,
+  timeout: 20000,
 });
 
-export type AskResponse = {
-  title?: string;
-  summary: string;
-  actionable_steps?: string[];
-  sources?: Source[];
-  provider?: string;
-  agent_used?: boolean;
-  priority_level?: string;
-  follow_up_questions?: string[];
-  intent_classification?: Record<string, unknown>;
-  session_id?: string | null;
+export type AssistantResponse = {
+  answer: string;
+  context: {
+    personal_inflation?: PersonalInflationSnapshot;
+  };
 };
 
-export type ChatSessionSummary = {
-  id: string;
-  title: string;
-  last_message: string;
-  message_count: number;
-  created_at?: string;
-  updated_at?: string;
+export type PersonalInflationSnapshot = {
+  personal_rate: number | null;
+  national_rate: number;
+  category_totals: Record<string, number>;
+  category_weights: Record<string, number>;
+  top_drivers: string[];
+  total_spend: number;
 };
 
-export type ChatSessionDetail = ChatSessionSummary & {
-  messages: ChatMsg[];
-};
-
-function mapHistory(history: ChatMsg[] = []): Array<{ role: string; content: string }> {
-  return history
-    .filter((msg) => msg.role && msg.content)
-    .map((msg) => ({ role: msg.role, content: msg.content }));
-}
-
-export async function ask(
-  question: string,
-  options: {
-    sessionId?: string | null;
-    conversationHistory?: ChatMsg[];
-    context?: Record<string, unknown>;
-    title?: string;
-  } = {}
-) {
-  const payload: Record<string, unknown> = { question };
-
-  if (options.sessionId) {
-    payload.session_id = options.sessionId;
-  }
-  if (options.conversationHistory) {
-    payload.conversation_history = mapHistory(options.conversationHistory);
-  }
-  if (options.context) {
-    payload.context = options.context;
-  }
-  if (options.title) {
-    payload.title = options.title;
-  }
-
-  const { data } = await api.post("/ask", payload);
-  return data as AskResponse;
-}
-
-export async function createChatSessionRequest(title?: string) {
-  const payload = title ? { title } : {};
-  const { data } = await api.post("/chat/sessions", payload);
-  return data as { session_id: string; title: string };
-}
-
-export async function listChatSessions() {
-  const { data } = await api.get("/chat/sessions");
-  return data as { sessions: ChatSessionSummary[] };
-}
-
-export async function fetchChatSession(sessionId: string) {
-  const { data } = await api.get(`/chat/sessions/${sessionId}`);
-  const messages: ChatMsg[] = (data.messages || []).map((msg: any, index: number) => ({
-    id: `${sessionId}-${index}`,
-    role: msg.role === "assistant" ? "bot" : msg.role,
-    content: msg.content || "",
-    sources: msg.sources || [],
-    timestamp: msg.timestamp,
-  }));
-
-  return {
-    id: data.id as string,
-    title: (data.title || "Conversation") as string,
-    last_message: (data.last_message || "") as string,
-    message_count: (data.message_count || messages.length) as number,
-    created_at: data.created_at as string | undefined,
-    updated_at: data.updated_at as string | undefined,
-    messages,
-  } satisfies ChatSessionDetail;
-}
-
-export interface MandateResponse {
-  success?: boolean;
-  mandate?: any;
-  message?: string;
-  execution_result?: any;
-}
-
-export async function approveMandate(mandateId: string) {
-  const { data } = await api.post<MandateResponse>(`/api/ap2/mandates/${mandateId}/approve`);
-  return data;
-}
-
-export async function executeMandate(mandateId: string) {
-  const { data } = await api.post<MandateResponse>(`/api/ap2/mandates/${mandateId}/execute`);
-  return data;
-}
-
-export async function cancelMandate(mandateId: string) {
-  const { data } = await api.post<MandateResponse>(`/api/ap2/mandates/${mandateId}/cancel`);
-  return data;
-}
-
-export interface TransactionPayload {
+export type TransactionRecord = {
+  transaction_id: string;
+  name: string;
+  merchant_name?: string;
   amount: number;
-  description: string;
   date: string;
-}
+  category: string;
+};
 
-export async function createDeposit(payload: TransactionPayload) {
-  const { data } = await api.post("/me/transactions/deposits", payload);
-  return data as { transaction: any; total_balance?: number };
-}
+export type TransactionsResponse = {
+  transactions: TransactionRecord[];
+  category_totals: Record<string, number>;
+  personal_inflation: PersonalInflationSnapshot;
+  balances?: any;
+  overrides: Record<string, string>;
+  next_cursor?: string | null;
+};
 
-export async function createPurchase(payload: TransactionPayload) {
-  const { data } = await api.post("/me/transactions/purchases", payload);
-  return data as { transaction: any; total_balance?: number };
-}
+export const askAssistant = async (question: string) => {
+  const { data } = await api.post<AssistantResponse>("/assistant/ask", { question });
+  return data;
+};
 
-export async function categorizeTransaction(payload: { category_key: string; category: string }) {
-  const { data } = await api.post("/me/transactions/categorize", payload);
-  return data as { category_key: string; category: string; persisted: boolean };
-}
+export const fetchTransactions = async () => {
+  const { data } = await api.get<TransactionsResponse>("/transactions");
+  return data;
+};
+
+export const overrideTransactionCategory = async (transactionId: string, category: string) => {
+  const { data } = await api.post("/transactions/categorize", {
+    transaction_id: transactionId,
+    category,
+  });
+  return data as { ok: boolean; transaction_id: string; category: string };
+};
+
+export const getPlaidStatus = async () => {
+  const { data } = await api.get("/plaid/status");
+  return data as { linked: boolean; balances?: any; warning?: string };
+};
+
+export const createPlaidLinkToken = async () => {
+  const { data } = await api.post("/plaid/link-token");
+  return data as { link_token: string; expiration?: string | null; mode?: string };
+};
+
+export const exchangePlaidPublicToken = async (payload: { public_token: string; institution?: any }) => {
+  const { data } = await api.post("/plaid/exchange", payload);
+  return data as { ok: boolean; item_id: string; mode: string; balances?: any };
+};
+
+export const unlinkPlaid = async () => {
+  const { data } = await api.delete("/plaid/link");
+  return data as { ok: boolean };
+};
+
+export const fetchPersonalInflation = async (refresh = false) => {
+  const { data } = await api.get("/inflation/personal", { params: { refresh: refresh ? "true" : "false" } });
+  return data.personal_inflation as PersonalInflationSnapshot;
+};
+
+export const submitReceipt = async (items: string[], total: number) => {
+  const { data } = await api.post("/uploads/receipt", { items, total });
+  return data as { summary: string };
+};

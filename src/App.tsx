@@ -8,7 +8,6 @@ import RegisterPage from "@/pages/RegisterPage";
 import Onboarding from "@/pages/Onboarding";
 import Dashboard from "@/pages/Dashboard";
 import LandingPage from "@/pages/LandingPage";
-import DemoDashboard from "@/pages/DemoDashboard";
 import TrustAgentPage from "@/pages/TrustAgentPage";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { AuthProvider } from "@/context/Auth";
@@ -37,13 +36,6 @@ export default function App() {
           </Layout>
         } />
         
-        {/* Demo dashboard (public for demo purposes) */}
-        <Route path="/dashboard-demo" element={
-          <Layout>
-            <DemoDashboard />
-          </Layout>
-        } />
-        
         {/* Protected routes */}
         <Route path="/onboarding" element={
           <Layout>
@@ -55,7 +47,7 @@ export default function App() {
         
         <Route path="/dashboard" element={
           <Layout>
-            <ProtectedRoute requiresNessie>
+            <ProtectedRoute requiresPlaid>
               <Dashboard />
             </ProtectedRoute>
           </Layout>

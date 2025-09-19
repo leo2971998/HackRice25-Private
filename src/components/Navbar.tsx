@@ -28,8 +28,8 @@ export default function Navbar() {
               <Zap className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white">Houston Financial Navigator</h1>
-              <p className="text-xs text-dark-900">Smart Financial Management</p>
+              <h1 className="text-xl font-bold text-white">Inflate-Wise</h1>
+              <p className="text-xs text-dark-900">AI Personal Inflation Co-Pilot</p>
             </div>
           </Link>
 
@@ -66,7 +66,7 @@ export default function Navbar() {
                     `transition-colors ${isActive ? "text-primary-500 font-medium" : "text-dark-900 hover:text-primary-500"}`
                   }
                 >
-                  TrustAgent
+                  Lab
                 </NavLink>
               </>
             )}
@@ -83,7 +83,7 @@ export default function Navbar() {
 
             <div className="hidden md:flex items-center space-x-2 text-sm text-dark-900">
               <TrendingUp className="w-4 h-4" />
-              <span>Real-time Analysis</span>
+              <span>Personal CPI in minutes</span>
             </div>
 
             <div className="border-l border-dark-400 pl-6 flex items-center gap-4">
