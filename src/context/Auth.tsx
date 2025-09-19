@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { me } from "@/api/auth";
 
 type User = {
-  id: number;
+  id: string;
   email: string;
   first_name?: string;
   last_name?: string;

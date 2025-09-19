@@ -2,7 +2,7 @@ import { Route, Routes } from "react-router-dom";
 import Layout from "@/components/Layout";
 import ChatPage from "@/pages/ChatPage";
 import LearnPage from "@/pages/LearnPage";
-import AdminSandboxPage from "@/pages/AdminSandboxPage";
+import AdminPortalPage from "@/pages/AdminPortalPage";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import Onboarding from "@/pages/Onboarding";
@@ -83,7 +83,9 @@ export default function App() {
         
         <Route path="/admin" element={
           <Layout>
-            <AdminSandboxPage />
+            <ProtectedRoute requiresAdmin>
+              <AdminPortalPage />
+            </ProtectedRoute>
           </Layout>
         } />
       </Routes>

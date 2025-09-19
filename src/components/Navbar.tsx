@@ -20,70 +20,72 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="border-b border-dark-400 bg-dark-200/80 backdrop-blur-sm sticky top-0 z-50">
+    <nav className="border-b border-gray-200 bg-white sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          <Link to="/" className="flex items-center space-x-3 hover:text-primary-500 transition-colors">
-            <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center">
+          <Link to="/" className="flex items-center space-x-3 text-black hover:text-blue-600 transition-colors">
+            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
               <Zap className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white">Houston Financial Navigator</h1>
-              <p className="text-xs text-dark-900">Smart Financial Management</p>
+              <h1 className="text-xl font-bold text-black">Houston Financial Navigator</h1>
+              <p className="text-xs text-black">Smart Financial Management</p>
             </div>
           </Link>
 
-          <div className="flex items-center space-x-6 text-sm">
-            <NavLink 
-              to="/chat" 
-              className={({isActive}) => `hover:text-primary-500 transition-colors ${isActive ? "text-primary-500 font-medium" : "text-dark-900"}`}
+          <div className="flex items-center space-x-6 text-sm text-black">
+            <NavLink
+              to="/chat"
+              className={({isActive}) => `transition-colors ${isActive ? "text-blue-600 font-medium" : "text-black hover:text-blue-600"}`}
             >
               Chat
             </NavLink>
-            <NavLink 
-              to="/learn" 
-              className={({isActive}) => `hover:text-primary-500 transition-colors ${isActive ? "text-primary-500 font-medium" : "text-dark-900"}`}
+            <NavLink
+              to="/learn"
+              className={({isActive}) => `transition-colors ${isActive ? "text-blue-600 font-medium" : "text-black hover:text-blue-600"}`}
             >
               Learn
             </NavLink>
             {user && (
               <>
-                <NavLink 
-                  to="/dashboard" 
-                  className={({isActive}) => `hover:text-primary-500 transition-colors ${isActive ? "text-primary-500 font-medium" : "text-dark-900"}`}
+                <NavLink
+                  to="/dashboard"
+                  className={({isActive}) => `transition-colors ${isActive ? "text-blue-600 font-medium" : "text-black hover:text-blue-600"}`}
                 >
                   Dashboard
                 </NavLink>
-                <NavLink 
-                  to="/trustagent" 
-                  className={({isActive}) => `hover:text-primary-500 transition-colors ${isActive ? "text-primary-500 font-medium" : "text-dark-900"}`}
+                <NavLink
+                  to="/trustagent"
+                  className={({isActive}) => `transition-colors ${isActive ? "text-blue-600 font-medium" : "text-black hover:text-blue-600"}`}
                 >
                   TrustAgent
                 </NavLink>
               </>
             )}
-            <NavLink 
-              to="/admin" 
-              className={({isActive}) => `hover:text-primary-500 transition-colors ${isActive ? "text-primary-500 font-medium" : "text-dark-900"}`}
-            >
-              Admin
-            </NavLink>
+            {user?.role === "admin" && (
+              <NavLink
+                to="/admin"
+                className={({isActive}) => `transition-colors ${isActive ? "text-blue-600 font-medium" : "text-black hover:text-blue-600"}`}
+              >
+                Admin
+              </NavLink>
+            )}
 
-            <div className="hidden md:flex items-center space-x-2 text-sm text-dark-900">
+            <div className="hidden md:flex items-center space-x-2 text-sm text-black">
               <TrendingUp className="w-4 h-4" />
               <span>Real-time Analysis</span>
             </div>
 
-            <div className="border-l border-dark-400 pl-6 flex items-center gap-4">
+            <div className="border-l border-gray-200 pl-6 flex items-center gap-4">
               {!loading && (
                 user ? (
                   <div className="flex items-center gap-3">
-                    <span className="text-white font-medium">
+                    <span className="text-black font-medium">
                       {user.first_name || user.email}
                     </span>
                     <button
                       onClick={handleLogout}
-                      className="flex items-center gap-1 text-dark-900 hover:text-primary-500 transition-colors"
+                      className="flex items-center gap-1 text-black hover:text-blue-600 transition-colors"
                     >
                       <LogOut className="h-4 w-4" />
                       <span>Sign Out</span>
@@ -91,15 +93,15 @@ export default function Navbar() {
                   </div>
                 ) : (
                   <>
-                    <Link 
-                      to="/login" 
-                      className="text-dark-900 hover:text-primary-500 transition-colors"
+                    <Link
+                      to="/login"
+                      className="text-black hover:text-blue-600 transition-colors"
                     >
                       Sign In
                     </Link>
-                    <Link 
-                      to="/register" 
-                      className="bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white px-3 py-1.5 rounded-lg transition-all duration-200 text-sm shadow-lg"
+                    <Link
+                      to="/register"
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg transition-all duration-200 text-sm shadow-lg"
                     >
                       Sign Up
                     </Link>
