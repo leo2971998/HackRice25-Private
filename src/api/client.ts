@@ -31,6 +31,8 @@ export type TransactionRecord = {
   amount: number;
   date: string;
   category: string;
+  transaction_type?: string;
+  notes?: string;
 };
 
 export type TransactionsResponse = {
@@ -58,6 +60,27 @@ export const overrideTransactionCategory = async (transactionId: string, categor
     category,
   });
   return data as { ok: boolean; transaction_id: string; category: string };
+};
+
+export const createManualDeposit = async (payload: {
+  amount: number;
+  source?: string;
+  date?: string;
+  notes?: string;
+}) => {
+  const { data } = await api.post("/transactions/manual/deposit", payload);
+  return data as { ok: boolean; transaction: TransactionRecord };
+};
+
+export const createManualPurchase = async (payload: {
+  amount: number;
+  merchant?: string;
+  category: string;
+  date?: string;
+  notes?: string;
+}) => {
+  const { data } = await api.post("/transactions/manual/purchase", payload);
+  return data as { ok: boolean; transaction: TransactionRecord };
 };
 
 export const getPlaidStatus = async () => {

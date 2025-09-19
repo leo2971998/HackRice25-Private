@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import os
 import time
+from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
 from google.cloud import firestore
@@ -234,6 +235,63 @@ def set_category_override(user_id: str, transaction_id: str, category: str) -> T
     overrides = get_category_overrides(user_id)
     overrides[transaction_id] = category
     return update_user(user_id, {"category_overrides": overrides})
+
+
+# --- Manual transaction ledger ------------------------------------------------
+
+def create_manual_transaction(user_id: str, transaction: Dict[str, Any]) -> Tuple[bool, str]:
+    """Persist a manually-entered banking transaction for a user."""
+
+    db = get_firestore_client()
+    if not db:
+        return False, "Firestore not available"
+
+    payload = dict(transaction)
+    payload["user_id"] = user_id
+    payload.setdefault("occurred_at", datetime.utcnow().date().isoformat())
+    payload.setdefault("created_at", firestore.SERVER_TIMESTAMP)
+
+    try:
+        doc_ref = db.collection("bank_transactions").document()
+        doc_ref.set(payload)
+        return True, doc_ref.id
+    except Exception as exc:  # pragma: no cover - expose Firestore errors
+        return False, f"Failed to record transaction: {exc}"
+
+
+def list_manual_transactions(user_id: str, *, limit: int = 50) -> Tuple[List[Dict[str, Any]], str]:
+    """Return recent manually-entered transactions for the user."""
+
+    db = get_firestore_client()
+    if not db:
+        return [], "Firestore not available"
+
+    try:
+        query = (
+            db.collection("bank_transactions")
+            .where("user_id", "==", user_id)
+            .order_by("occurred_at", direction=firestore.Query.DESCENDING)
+            .limit(limit)
+        )
+        transactions: List[Dict[str, Any]] = []
+        for doc in query.stream():
+            data = doc.to_dict() or {}
+            occurred_at = data.get("occurred_at")
+            if hasattr(occurred_at, "isoformat"):
+                data["occurred_at"] = occurred_at.isoformat()
+            elif not occurred_at:
+                data["occurred_at"] = datetime.utcnow().date().isoformat()
+
+            created_at = data.get("created_at")
+            if hasattr(created_at, "isoformat"):
+                data["created_at"] = created_at.isoformat()
+
+            data.setdefault("transaction_type", "purchase")
+            data["id"] = doc.id
+            transactions.append(data)
+        return transactions, "Transactions listed"
+    except Exception as exc:  # pragma: no cover - propagate Firestore failures
+        return [], f"Failed to list transactions: {exc}"
 
 
 # --- Personal insights cache --------------------------------------------------
