@@ -69,22 +69,22 @@ export default function AdminPortalPage() {
       <div className="max-w-5xl mx-auto px-4 py-12 space-y-10">
         <div>
           <h1 className="text-3xl font-bold">Admin Portal</h1>
-          <p className="text-dark-900 mt-2">
+          <p className="text-white mt-2">
             Manage user accounts, promote trusted members, and keep your admin roster healthy.
           </p>
         </div>
 
         <div className="grid md:grid-cols-3 gap-6">
           <div className="border border-dark-400 rounded-xl p-6 bg-dark-200 shadow-lg">
-            <p className="text-sm uppercase tracking-wide text-dark-800">Total Users</p>
+            <p className="text-sm uppercase tracking-wide text-white">Total Users</p>
             <p className="text-3xl font-semibold text-white mt-2">{users.length}</p>
           </div>
           <div className="border border-dark-400 rounded-xl p-6 bg-dark-200 shadow-lg">
-            <p className="text-sm uppercase tracking-wide text-dark-800">Administrators</p>
+            <p className="text-sm uppercase tracking-wide text-white">Administrators</p>
             <p className="text-3xl font-semibold text-white mt-2">{totalAdmins}</p>
           </div>
           <div className="border border-dark-400 rounded-xl p-6 bg-dark-200 shadow-lg">
-            <p className="text-sm uppercase tracking-wide text-dark-800">Active Session</p>
+            <p className="text-sm uppercase tracking-wide text-white">Active Session</p>
             <p className="text-3xl font-semibold text-white mt-2 truncate">{user?.email}</p>
           </div>
         </div>
@@ -99,16 +99,16 @@ export default function AdminPortalPage() {
               <SkeletonGroup count={4} itemClassName="h-12 w-full bg-dark-300/70" />
             </div>
           ) : users.length === 0 ? (
-            <div className="p-6 text-center text-dark-900">No users found.</div>
+            <div className="p-6 text-center text-white">No users found.</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-dark-400 text-left">
                 <thead className="bg-dark-300">
                   <tr>
-                    <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide text-dark-800">Name</th>
-                    <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide text-dark-800">Email</th>
-                    <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide text-dark-800">Role</th>
-                    <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide text-dark-800">Actions</th>
+                    <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide text-white">Name</th>
+                    <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide text-white">Email</th>
+                    <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide text-white">Role</th>
+                    <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide text-white">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-dark-400">
@@ -120,7 +120,7 @@ export default function AdminPortalPage() {
                     return (
                       <tr key={u.id} className="bg-dark-200">
                         <td className="px-6 py-4 text-sm font-medium text-white">{fullName}</td>
-                        <td className="px-6 py-4 text-sm text-dark-800">{u.email}</td>
+                        <td className="px-6 py-4 text-sm text-white">{u.email}</td>
                         <td className="px-6 py-4 text-sm text-white">
                           <select
                             value={currentRole}
