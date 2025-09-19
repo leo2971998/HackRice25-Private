@@ -5,7 +5,7 @@ export default function SourceCard({ s }: { s: Source }) {
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between gap-2 mb-3">
-        <h4 className="font-semibold text-gray-900 text-sm leading-tight">{s.name}</h4>
+        <h4 className="font-semibold text-black text-sm leading-tight">{s.name}</h4>
         <div className="flex items-center gap-2 flex-shrink-0">
           {s.url && (
             <a 
@@ -31,12 +31,12 @@ export default function SourceCard({ s }: { s: Source }) {
       </div>
       
       {s.eligibility && (
-        <p className="text-xs text-gray-600 mb-3 bg-gray-50 rounded-lg p-2">
+        <p className="text-xs text-black mb-3 bg-gray-50 rounded-lg p-2">
           <span className="font-medium">Eligibility:</span> {s.eligibility}
         </p>
       )}
       
-      <div className="flex flex-wrap gap-3 text-xs text-gray-500">
+      <div className="flex flex-wrap gap-3 text-xs text-black">
         {s.phone && (
           <a href={`tel:${s.phone}`} className="inline-flex items-center gap-1 text-green-600 hover:text-green-800 transition-colors">
             <Phone size={12} /> {s.phone}
