@@ -28,7 +28,7 @@ export default function LandingPage() {
               Your AI Co-Pilot for Beating Personal Inflation
             </span>
           </h1>
-          <p className="text-xl text-dark-200 max-w-3xl mx-auto">
+          <p className="text-xl text-white max-w-3xl mx-auto">
             Connect your real financial accounts securely with Plaid, understand how inflation affects you—not just the national average—and get personalised coaching powered by Gemini to stay ahead.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -55,7 +55,7 @@ export default function LandingPage() {
                 <Shield className="h-8 w-8 text-primary-400" />
               </div>
               <h3 className="text-xl font-semibold text-white">Bank-grade connections</h3>
-              <p className="text-dark-200">
+              <p className="text-white/80">
                 Plaid Link keeps credentials safe while you sync credit card and bank accounts directly into Inflate-Wise. No mock data—just your spending, refreshed automatically.
               </p>
             </CardContent>
@@ -66,7 +66,7 @@ export default function LandingPage() {
                 <LineChart className="h-8 w-8 text-accent-emerald" />
               </div>
               <h3 className="text-xl font-semibold text-white">Personal inflation index</h3>
-              <p className="text-dark-200">
+              <p className="text-white/80">
                 Gemini categorises every transaction, maps it to Bureau of Labor Statistics CPI categories, and calculates a weighted rate that reflects your actual lifestyle.
               </p>
             </CardContent>
@@ -77,7 +77,7 @@ export default function LandingPage() {
                 <Bot className="h-8 w-8 text-purple-300" />
               </div>
               <h3 className="text-xl font-semibold text-white">AI financial coaching</h3>
-              <p className="text-dark-200">
+              <p className="text-white/80">
                 Ask Inflate-Wise why your rate is spiking, receive actionable tips, and trigger function calls that inspect your own spending mix in real time.
               </p>
             </CardContent>
@@ -90,7 +90,7 @@ export default function LandingPage() {
               <Wallet className="w-10 h-10 text-primary-400" />
               <div>
                 <h2 className="text-2xl font-semibold text-white">How it works</h2>
-                <p className="text-dark-200">Three simple steps to quantify and beat personal inflation.</p>
+                <p className="text-white/80">Three simple steps to quantify and beat personal inflation.</p>
               </div>
             </div>
             <ol className="space-y-6 text-left">
@@ -98,21 +98,21 @@ export default function LandingPage() {
                 <span className="w-8 h-8 rounded-full bg-primary-500/30 text-primary-200 flex items-center justify-center font-semibold">1</span>
                 <div>
                   <h3 className="text-white font-semibold">Link accounts with Plaid</h3>
-                  <p className="text-dark-200">Use the trusted Plaid Link flow to add cards and banks from hundreds of institutions in minutes.</p>
+                  <p className="text-white/80">Use the trusted Plaid Link flow to add cards and banks from hundreds of institutions in minutes.</p>
                 </div>
               </li>
               <li className="flex gap-4">
                 <span className="w-8 h-8 rounded-full bg-primary-500/30 text-primary-200 flex items-center justify-center font-semibold">2</span>
                 <div>
                   <h3 className="text-white font-semibold">Let Gemini organise the noise</h3>
-                  <p className="text-dark-200">We send transaction descriptions to Gemini with a constrained taxonomy so each purchase lands in the right CPI bucket.</p>
+                  <p className="text-white/80">We send transaction descriptions to Gemini with a constrained taxonomy so each purchase lands in the right CPI bucket.</p>
                 </div>
               </li>
               <li className="flex gap-4">
                 <span className="w-8 h-8 rounded-full bg-primary-500/30 text-primary-200 flex items-center justify-center font-semibold">3</span>
                 <div>
                   <h3 className="text-white font-semibold">Track, learn, and act</h3>
-                  <p className="text-dark-200">Watch your personalised inflation dashboard update instantly and chat with the assistant for tailored strategies.</p>
+                  <p className="text-white/80">Watch your personalised inflation dashboard update instantly and chat with the assistant for tailored strategies.</p>
                 </div>
               </li>
             </ol>
@@ -123,20 +123,20 @@ export default function LandingPage() {
               <Camera className="w-10 h-10 text-primary-400" />
               <div>
                 <h2 className="text-2xl font-semibold text-white">Bring receipts to life</h2>
-                <p className="text-dark-200">Multimodal uploads powered by Gemini</p>
+                <p className="text-white/80">Multimodal uploads powered by Gemini</p>
               </div>
             </div>
-            <p className="text-dark-200 mb-6">
+            <p className="text-white/80 mb-6">
               Snap a bill or grocery receipt and let Gemini Vision extract line items automatically. Inflate-Wise categorises the expense, updates your dashboard, and summarises the impact on your inflation footprint.
             </p>
             <div className="space-y-4">
               <div className="bg-dark-300/60 border border-dark-400/50 rounded-xl p-4">
                 <h4 className="text-white font-semibold mb-2">Automatic parsing</h4>
-                <p className="text-dark-200 text-sm">Gemini Vision reads totals, dates, and merchants in seconds—no manual data entry required.</p>
+                <p className="text-white/80 text-sm">Gemini Vision reads totals, dates, and merchants in seconds—no manual data entry required.</p>
               </div>
               <div className="bg-dark-300/60 border border-dark-400/50 rounded-xl p-4">
                 <h4 className="text-white font-semibold mb-2">Instant categorisation</h4>
-                <p className="text-dark-200 text-sm">Receipts flow straight into the same CPI-aligned model driving your personal inflation insights.</p>
+                <p className="text-white/80 text-sm">Receipts flow straight into the same CPI-aligned model driving your personal inflation insights.</p>
               </div>
             </div>
           </Card>
@@ -149,7 +149,7 @@ export default function LandingPage() {
                 <PieChart className="h-8 w-8 text-blue-300" />
               </div>
               <h3 className="text-xl font-semibold text-white">Judge-friendly storytelling</h3>
-              <p className="text-dark-200">Every widget ties into CPI data and real spending so hackathon judges see a credible, production-ready path.</p>
+              <p className="text-white/80">Every widget ties into CPI data and real spending so hackathon judges see a credible, production-ready path.</p>
             </CardContent>
           </Card>
           <Card hoverable>
@@ -158,7 +158,7 @@ export default function LandingPage() {
                 <Bot className="h-8 w-8 text-orange-300" />
               </div>
               <h3 className="text-xl font-semibold text-white">Function calling intelligence</h3>
-              <p className="text-dark-200">Gemini dynamically requests personal inflation snapshots before responding, ensuring advice is grounded in live numbers.</p>
+              <p className="text-white/80">Gemini dynamically requests personal inflation snapshots before responding, ensuring advice is grounded in live numbers.</p>
             </CardContent>
           </Card>
           <Card hoverable>
@@ -167,14 +167,14 @@ export default function LandingPage() {
                 <Sparkles className="h-8 w-8 text-green-300" />
               </div>
               <h3 className="text-xl font-semibold text-white">Designed to wow</h3>
-              <p className="text-dark-200">A cinematic UI, dark neon gradients, and motion states highlight complex analysis in a glanceable way.</p>
+              <p className="text-white/80">A cinematic UI, dark neon gradients, and motion states highlight complex analysis in a glanceable way.</p>
             </CardContent>
           </Card>
         </section>
 
         <section className="text-center space-y-4">
           <h2 className="text-3xl font-bold text-white">Ready to know your real inflation rate?</h2>
-          <p className="text-dark-200 max-w-2xl mx-auto">
+          <p className="text-white/80 max-w-2xl mx-auto">
             Start free, link a credit card, and let Inflate-Wise become the smartest teammate on your financial journey.
           </p>
           <button

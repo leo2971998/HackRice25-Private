@@ -270,11 +270,11 @@ export default function Dashboard() {
             </CardTitle>
             {renderRateBadge(personalRate, "personal inflation")}
           </CardHeader>
-          <CardContent className="space-y-3 text-dark-200">
+          <CardContent className="space-y-3 text-white">
             <p>
               National CPI: <span className="text-white font-semibold">{nationalRate !== null ? `${nationalRate.toFixed(2)}%` : "Loading"}</span>
             </p>
-            <p className="text-sm text-dark-200">
+            <p className="text-sm text-white/80">
               Weighted using the last 30 days of your spending, mapped directly to Bureau of Labor Statistics categories.
             </p>
           </CardContent>
@@ -289,7 +289,7 @@ export default function Dashboard() {
             <Sparkles className="w-5 h-5 text-orange-300" />
           </CardHeader>
           <CardContent>
-            <ul className="space-y-2 text-dark-200 text-sm">
+            <ul className="space-y-2 text-white text-sm">
               {(inflation?.top_drivers || []).length ? (
                 inflation!.top_drivers.map(driver => (
                   <li key={driver} className="flex justify-between">
@@ -298,7 +298,7 @@ export default function Dashboard() {
                   </li>
                 ))
               ) : (
-                <li className="text-dark-200">Not enough data yet. Refresh after more transactions sync.</li>
+                <li className="text-white/80">Not enough data yet. Refresh after more transactions sync.</li>
               )}
             </ul>
           </CardContent>
@@ -340,13 +340,13 @@ export default function Dashboard() {
         <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <CardTitle className="text-white text-xl">Recent transactions</CardTitle>
-            <p className="text-dark-200 text-sm">Override categories to fine tune your inflation model.</p>
+            <p className="text-white/80 text-sm">Override categories to fine tune your inflation model.</p>
           </div>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           <table className="min-w-full text-left text-sm">
             <thead>
-              <tr className="text-dark-200 border-b border-dark-400/40">
+              <tr className="text-white border-b border-dark-400/40">
                 <th className="py-3 pr-4 font-medium">Merchant</th>
                 <th className="py-3 pr-4 font-medium">Date</th>
                 <th className="py-3 pr-4 font-medium">Amount</th>
@@ -356,7 +356,7 @@ export default function Dashboard() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={4} className="py-8 text-center text-dark-200">
+                  <td colSpan={4} className="py-8 text-center text-white">
                     <Loader2 className="w-5 h-5 animate-spin mx-auto" />
                   </td>
                 </tr>
@@ -388,7 +388,7 @@ export default function Dashboard() {
                 })
               ) : (
                 <tr>
-                  <td colSpan={4} className="py-6 text-center text-dark-200">
+                  <td colSpan={4} className="py-6 text-center text-white/80">
                     No recent transactions found. Make a purchase and refresh to see the magic.
                   </td>
                 </tr>
@@ -401,7 +401,7 @@ export default function Dashboard() {
       <Card className="bg-dark-200/40 border border-dark-400/60">
         <CardHeader>
           <CardTitle className="text-white text-xl">Receipt intelligence</CardTitle>
-          <p className="text-dark-200 text-sm">Paste grocery line items to see how Gemini Vision narrates the spend.</p>
+          <p className="text-white/80 text-sm">Paste grocery line items to see how Gemini Vision narrates the spend.</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={submitReceiptForAnalysis} className="grid md:grid-cols-2 gap-6">
