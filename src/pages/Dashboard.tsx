@@ -79,6 +79,10 @@ export default function Dashboard() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Skip redirect for demo mode
+    if (window.location.hash === '#demo') {
+      return;
+    }
     if (!user) {
       navigate("/login");
     }

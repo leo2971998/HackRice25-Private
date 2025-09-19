@@ -23,6 +23,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // For demo purposes, skip auth and use a mock user
+    if (window.location.hash === '#demo') {
+      setUser({
+        id: 'demo-user',
+        email: 'demo@example.com',
+        first_name: 'Demo',
+        last_name: 'User',
+        role: 'user'
+      });
+      setLoading(false);
+      return;
+    }
+    
     me()
       .then(setUser)
       .catch(() => setUser(null))
