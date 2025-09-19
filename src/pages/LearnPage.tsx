@@ -77,7 +77,7 @@ export default function LearnPage() {
             <Brain className="w-10 h-10 text-primary-300" />
             <div>
               <CardTitle className="text-white text-2xl">Inflation Academy</CardTitle>
-              <p className="text-dark-200 text-sm">
+              <p className="text-white/80 text-sm">
                 Master the concepts behind Inflate-Wise so you can explain the magic to judges, mentors, and future users.
               </p>
             </div>
@@ -96,7 +96,7 @@ export default function LearnPage() {
               <insight.icon className="w-6 h-6 text-primary-300" />
               <CardTitle className="text-white text-lg">{insight.title}</CardTitle>
             </CardHeader>
-            <CardContent className="text-sm text-dark-200">{insight.description}</CardContent>
+            <CardContent className="text-sm text-white/80">{insight.description}</CardContent>
           </Card>
         ))}
       </div>
@@ -115,7 +115,7 @@ export default function LearnPage() {
                 className={`w-full text-left px-4 py-3 rounded-lg border text-sm transition ${
                   activeModule === module.id
                     ? "border-primary-500 bg-primary-500/20 text-white"
-                    : "border-dark-400 bg-dark-300/40 text-dark-50 hover:border-primary-500"
+                    : "border-dark-400 bg-dark-300/40 text-white hover:border-primary-500"
                 }`}
               >
                 {module.title}
@@ -126,8 +126,8 @@ export default function LearnPage() {
             {MODULES.filter(module => module.id === activeModule).map(module => (
               <div key={module.id} className="space-y-3">
                 <h3 className="text-white text-lg font-semibold">{module.title}</h3>
-                <p className="text-dark-200 text-sm">{module.description}</p>
-                <ul className="space-y-2 text-sm text-dark-50">
+                <p className="text-white/80 text-sm">{module.description}</p>
+                <ul className="space-y-2 text-sm text-white">
                   {module.points.map(point => (
                     <li key={point} className="flex items-start gap-2">
                       <Zap className="w-4 h-4 text-primary-400 mt-1" />
@@ -146,7 +146,7 @@ export default function LearnPage() {
           <TrendingUp className="w-6 h-6 text-primary-300" />
           <CardTitle className="text-white text-xl">Pitch-ready talking points</CardTitle>
         </CardHeader>
-        <CardContent className="grid md:grid-cols-2 gap-6 text-sm text-dark-200">
+        <CardContent className="grid md:grid-cols-2 gap-6 text-sm text-white">
           <div className="space-y-3">
             <h4 className="text-white font-semibold">Problem</h4>
             <p>Generic inflation numbers hide the reality of rapid price changes in certain categories.</p>

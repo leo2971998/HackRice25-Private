@@ -61,7 +61,7 @@ export default function ChatPage() {
             <MessageCircle className="w-5 h-5 text-primary-400" />
             Ask Inflate-Wise
           </CardTitle>
-          <p className="text-dark-700 text-sm">
+          <p className="text-white/70 text-sm">
             Gemini analyses your personal inflation data before responding, so answers are grounded in your real numbers.
           </p>
         </CardHeader>
@@ -70,13 +70,13 @@ export default function ChatPage() {
             {conversation.map((turn, index) => (
               <div
                 key={`${turn.role}-${index}`}
-                className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${turn.role === "user" ? "ml-auto bg-primary-500 text-white" : "bg-dark-300/60 border border-dark-400 text-dark-100"}`}
+                className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${turn.role === "user" ? "ml-auto bg-primary-500 text-white" : "bg-dark-300/60 border border-dark-400 text-white"}`}
               >
                 {turn.content}
               </div>
             ))}
             {loading && (
-              <div className="max-w-[85%] bg-dark-300/60 border border-dark-400 rounded-2xl px-4 py-3 text-sm text-dark-200 flex items-center gap-3">
+              <div className="max-w-[85%] bg-dark-300/60 border border-dark-400 rounded-2xl px-4 py-3 text-sm text-white flex items-center gap-3">
                 <Loader2 className="w-4 h-4 animate-spin text-primary-300" />
                 Analysing your latest transactions...
               </div>
@@ -116,7 +116,7 @@ export default function ChatPage() {
               <button
                 key={prompt}
                 onClick={() => sendPrompt(prompt)}
-                className="w-full text-left px-4 py-3 rounded-lg bg-dark-300/60 border border-dark-400 text-sm text-dark-50 hover:border-primary-500 transition"
+                className="w-full text-left px-4 py-3 rounded-lg bg-dark-300/60 border border-dark-400 text-sm text-white hover:border-primary-500 transition"
               >
                 {prompt}
               </button>
@@ -128,7 +128,7 @@ export default function ChatPage() {
           <CardHeader>
             <CardTitle className="text-white text-lg">What can I do?</CardTitle>
           </CardHeader>
-          <CardContent className="text-sm text-dark-200 space-y-3">
+          <CardContent className="text-sm text-white space-y-3">
             <p>• Ask for a breakdown of what caused last month's personal inflation.</p>
             <p>• Get actionable steps to control a specific category like groceries or travel.</p>
             <p>• Upload a receipt on the dashboard and ask the assistant to interpret it.</p>
