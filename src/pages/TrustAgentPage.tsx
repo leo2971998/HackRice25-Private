@@ -185,8 +185,8 @@ export default function TrustAgentPage() {
               <Bot className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">TrustAgent</h1>
-              <p className="text-gray-600">Your AP2-Powered Financial Co-Pilot</p>
+              <h1 className="text-3xl font-bold text-black">TrustAgent</h1>
+              <p className="text-black">Your AP2-Powered Financial Co-Pilot</p>
             </div>
           </div>
           
@@ -196,8 +196,8 @@ export default function TrustAgentPage() {
               <div className="flex items-center gap-3">
                 <Shield className="h-8 w-8 text-blue-600" />
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Active Mandates</p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-sm font-medium text-black">Active Mandates</p>
+                  <p className="text-2xl font-bold text-black">
                     {stats?.active_mandates || 0}
                   </p>
                 </div>
@@ -208,8 +208,8 @@ export default function TrustAgentPage() {
               <div className="flex items-center gap-3">
                 <Zap className="h-8 w-8 text-green-600" />
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Automations</p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-sm font-medium text-black">Automations</p>
+                  <p className="text-2xl font-bold text-black">
                     {stats?.ap2_stats?.active_automations || 0}
                   </p>
                 </div>
@@ -220,8 +220,8 @@ export default function TrustAgentPage() {
               <div className="flex items-center gap-3">
                 <Target className="h-8 w-8 text-purple-600" />
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Total Mandates</p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-sm font-medium text-black">Total Mandates</p>
+                  <p className="text-2xl font-bold text-black">
                     {stats?.ap2_stats?.total_mandates || 0}
                   </p>
                 </div>
@@ -232,8 +232,8 @@ export default function TrustAgentPage() {
               <div className="flex items-center gap-3">
                 <Lock className="h-8 w-8 text-orange-600" />
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Pending</p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-sm font-medium text-black">Pending</p>
+                  <p className="text-2xl font-bold text-black">
                     {stats?.ap2_stats?.pending_approvals || 0}
                   </p>
                 </div>
@@ -247,7 +247,7 @@ export default function TrustAgentPage() {
           {/* AI Insights */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <h2 className="text-xl font-semibold text-black mb-4 flex items-center gap-2">
                 <TrendingUp className="h-5 w-5 text-blue-600" />
                 AI Financial Insights
               </h2>
@@ -265,14 +265,14 @@ export default function TrustAgentPage() {
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-500">No insights available. Start by creating some mandates!</p>
+                <p className="text-black">No insights available. Start by creating some mandates!</p>
               )}
             </div>
 
             {/* AP2 Mandates */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                <h2 className="text-xl font-semibold text-black flex items-center gap-2">
                   <Shield className="h-5 w-5 text-blue-600" />
                   AP2 Mandates
                 </h2>
@@ -287,7 +287,7 @@ export default function TrustAgentPage() {
 
               {showCreateMandate && (
                 <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                  <h3 className="font-medium text-gray-900 mb-3">Quick Actions</h3>
+                  <h3 className="font-medium text-black mb-3">Quick Actions</h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <button
                       onClick={createSavingsGoal}
@@ -314,7 +314,7 @@ export default function TrustAgentPage() {
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
                           {getStatusIcon(mandate.status)}
-                          <span className="font-medium text-gray-900 capitalize">
+                          <span className="font-medium text-black capitalize">
                             {mandate.type} Mandate
                           </span>
                         </div>
@@ -328,7 +328,7 @@ export default function TrustAgentPage() {
                         </span>
                       </div>
                       
-                      <div className="text-sm text-gray-600">
+                      <div className="text-sm text-black">
                         <p><strong>Intent:</strong> {mandate.data?.intent_type || mandate.data?.purpose || "Financial automation"}</p>
                         {mandate.data?.amount && (
                           <p><strong>Amount:</strong> ${mandate.data.amount}</p>
@@ -341,8 +341,8 @@ export default function TrustAgentPage() {
               ) : (
                 <div className="text-center py-8">
                   <Shield className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-                  <p className="text-gray-500 mb-4">No AP2 mandates yet</p>
-                  <p className="text-sm text-gray-400">Create your first mandate to start autonomous financial management</p>
+                  <p className="text-black mb-4">No AP2 mandates yet</p>
+                  <p className="text-sm text-black">Create your first mandate to start autonomous financial management</p>
                 </div>
               )}
             </div>
@@ -353,7 +353,7 @@ export default function TrustAgentPage() {
             
             {/* AP2 Features */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <h3 className="text-lg font-semibold text-black mb-4 flex items-center gap-2">
                 <Bot className="h-5 w-5 text-blue-600" />
                 AP2 Features
               </h3>
@@ -362,24 +362,24 @@ export default function TrustAgentPage() {
                 <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
                   <Shield className="h-5 w-5 text-blue-600" />
                   <div>
-                    <p className="font-medium text-gray-900">Secure Mandates</p>
-                    <p className="text-xs text-gray-600">Cryptographically signed</p>
+                    <p className="font-medium text-black">Secure Mandates</p>
+                    <p className="text-xs text-black">Cryptographically signed</p>
                   </div>
                 </div>
                 
                 <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
                   <Zap className="h-5 w-5 text-green-600" />
                   <div>
-                    <p className="font-medium text-gray-900">Auto-Execution</p>
-                    <p className="text-xs text-gray-600">Autonomous operations</p>
+                    <p className="font-medium text-black">Auto-Execution</p>
+                    <p className="text-xs text-black">Autonomous operations</p>
                   </div>
                 </div>
                 
                 <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
                   <Target className="h-5 w-5 text-purple-600" />
                   <div>
-                    <p className="font-medium text-gray-900">Smart Goals</p>
-                    <p className="text-xs text-gray-600">AI-powered recommendations</p>
+                    <p className="font-medium text-black">Smart Goals</p>
+                    <p className="text-xs text-black">AI-powered recommendations</p>
                   </div>
                 </div>
               </div>
@@ -387,7 +387,7 @@ export default function TrustAgentPage() {
 
             {/* Quick Actions */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <h3 className="text-lg font-semibold text-black mb-4 flex items-center gap-2">
                 <Settings className="h-5 w-5 text-gray-600" />
                 Quick Actions
               </h3>
