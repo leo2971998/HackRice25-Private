@@ -39,17 +39,17 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex items-center justify-center py-12 px-4 bg-white min-h-[calc(100vh-8rem)] text-black">
-      <div className="max-w-2xl w-full bg-white border border-gray-200 rounded-2xl shadow-sm p-8">
+    <div className="flex items-center justify-center py-12 px-4 bg-dark-100 min-h-[calc(100vh-8rem)] text-white">
+      <div className="max-w-2xl w-full bg-dark-200 border border-dark-400 rounded-2xl shadow-xl p-8">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-black mb-2">Join Houston Financial Navigator</h1>
-          <p className="text-black">Create your account to start your financial journey</p>
+          <h1 className="text-3xl font-bold text-white mb-2">Join Houston Financial Navigator</h1>
+          <p className="text-dark-900">Create your account to start your financial journey</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 text-black">
+        <form onSubmit={handleSubmit} className="space-y-4 text-white">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="first_name" className="block text-sm font-medium text-black mb-1">
+              <label htmlFor="first_name" className="block text-sm font-medium text-dark-900 mb-1">
                 First Name
               </label>
               <input
@@ -58,12 +58,12 @@ export default function RegisterPage() {
                 type="text"
                 value={formData.first_name}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-black"
+                className="w-full px-4 py-3 border border-dark-400 bg-dark-300 text-white placeholder-dark-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                 placeholder="John"
               />
             </div>
             <div>
-              <label htmlFor="last_name" className="block text-sm font-medium text-black mb-1">
+              <label htmlFor="last_name" className="block text-sm font-medium text-dark-900 mb-1">
                 Last Name
               </label>
               <input
@@ -72,14 +72,14 @@ export default function RegisterPage() {
                 type="text"
                 value={formData.last_name}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-black"
+                className="w-full px-4 py-3 border border-dark-400 bg-dark-300 text-white placeholder-dark-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                 placeholder="Doe"
               />
             </div>
           </div>
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-black mb-1">
+            <label htmlFor="email" className="block text-sm font-medium text-dark-900 mb-1">
               Email
             </label>
             <input
@@ -89,13 +89,13 @@ export default function RegisterPage() {
               value={formData.email}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-black"
+              className="w-full px-4 py-3 border border-dark-400 bg-dark-300 text-white placeholder-dark-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
               placeholder="your@email.com"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-black mb-1">
+            <label htmlFor="password" className="block text-sm font-medium text-dark-900 mb-1">
               Password
             </label>
             <input
@@ -105,7 +105,7 @@ export default function RegisterPage() {
               value={formData.password}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-black"
+              className="w-full px-4 py-3 border border-dark-400 bg-dark-300 text-white placeholder-dark-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
               placeholder="••••••••"
             />
           </div>
@@ -113,7 +113,7 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold disabled:opacity-60 disabled:cursor-not-allowed hover:bg-blue-700 transition-all duration-200 shadow-sm"
+            className="w-full bg-gradient-to-r from-primary-500 to-primary-600 text-white py-3 px-4 rounded-lg font-semibold disabled:opacity-60 disabled:cursor-not-allowed hover:from-primary-600 hover:to-primary-700 transition-all duration-200 shadow-lg"
           >
             {loading ? (
               <div className="flex items-center justify-center space-x-2">
@@ -127,9 +127,9 @@ export default function RegisterPage() {
         </form>
 
         <div className="mt-6 text-center">
-          <p className="text-black">
+          <p className="text-dark-900">
             Already have an account?{" "}
-            <Link to="/login" className="text-blue-600 hover:text-blue-800 font-medium">
+            <Link to="/login" className="text-primary-500 hover:text-primary-400 font-medium">
               Sign in
             </Link>
           </p>

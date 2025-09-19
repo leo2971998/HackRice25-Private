@@ -40,16 +40,16 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center py-12 px-4 bg-white min-h-[calc(100vh-8rem)]">
-      <div className="max-w-2xl w-full bg-white border border-gray-200 rounded-2xl shadow-sm p-8">
+    <div className="flex items-center justify-center py-12 px-4 bg-dark-100 min-h-[calc(100vh-8rem)]">
+      <div className="max-w-2xl w-full bg-dark-200 border border-dark-400 rounded-2xl shadow-xl p-8">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-black mb-2">Welcome Back</h1>
-          <p className="text-black">Sign in to your Houston Financial Navigator account</p>
+          <h1 className="text-3xl font-bold text-white mb-2">Welcome Back</h1>
+          <p className="text-dark-900">Sign in to your Houston Financial Navigator account</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 text-black">
+        <form onSubmit={handleSubmit} className="space-y-4 text-white">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-black mb-1">
+            <label htmlFor="email" className="block text-sm font-medium text-dark-900 mb-1">
               Email
             </label>
             <input
@@ -58,13 +58,13 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-black"
+              className="w-full px-4 py-3 border border-dark-400 bg-dark-300 text-white placeholder-dark-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
               placeholder="your@email.com"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-black mb-1">
+            <label htmlFor="password" className="block text-sm font-medium text-dark-900 mb-1">
               Password
             </label>
             <input
@@ -73,7 +73,7 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-black"
+              className="w-full px-4 py-3 border border-dark-400 bg-dark-300 text-white placeholder-dark-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
               placeholder="••••••••"
             />
           </div>
@@ -81,7 +81,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-lg font-semibold disabled:opacity-60 disabled:cursor-not-allowed hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 shadow-lg"
+            className="w-full bg-gradient-to-r from-primary-500 to-primary-600 text-white py-3 px-4 rounded-lg font-semibold disabled:opacity-60 disabled:cursor-not-allowed hover:from-primary-600 hover:to-primary-700 transition-all duration-200 shadow-lg"
           >
             {loading ? (
               <div className="flex items-center justify-center space-x-2">
@@ -95,9 +95,9 @@ export default function LoginPage() {
         </form>
 
         <div className="mt-6 text-center">
-          <p className="text-black">
+          <p className="text-dark-900">
             Don't have an account?{" "}
-            <Link to="/register" className="text-blue-600 hover:text-blue-800 font-medium">
+            <Link to="/register" className="text-primary-500 hover:text-primary-400 font-medium">
               Sign up
             </Link>
           </p>

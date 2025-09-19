@@ -344,7 +344,7 @@ export default function ChatPage() {
                 )}
               </div>
 
-              <div className="border-t bg-white p-6">
+              <div className="border-t border-dark-400 bg-dark-200 p-6">
                 <form
                   onSubmit={(event) => {
                     event.preventDefault();
@@ -357,14 +357,14 @@ export default function ChatPage() {
                       value={input}
                       onChange={(event) => setInput(event.target.value)}
                       placeholder="Ask about rent, utilities, SNAP, homebuyer aid…"
-                      className="w-full rounded-xl border-2 border-gray-200 bg-gray-50 px-4 py-3 text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:bg-white focus:outline-none transition-all"
+                      className="w-full rounded-xl border-2 border-dark-400 bg-dark-300 px-4 py-3 text-dark-900 placeholder-dark-700 focus:border-primary-500 focus:bg-dark-400 focus:outline-none transition-all"
                       disabled={loading}
                     />
                   </div>
                   <button
                     type="submit"
                     disabled={loading || !input.trim()}
-                    className="rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-3 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:from-blue-700 hover:to-indigo-700 transition-all duration-200 flex items-center space-x-2 shadow-lg"
+                    className="rounded-xl bg-gradient-to-r from-primary-500 to-primary-600 px-6 py-3 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:from-primary-600 hover:to-primary-700 transition-all duration-200 flex items-center space-x-2 shadow-lg"
                   >
                     <Send className="h-4 w-4" />
                     <span>{loading ? "Thinking…" : "Ask"}</span>
