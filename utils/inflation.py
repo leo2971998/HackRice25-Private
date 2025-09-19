@@ -74,6 +74,8 @@ def normalise_transactions(transactions: Iterable[Dict[str, Any]], *, months: in
     cutoff = datetime.utcnow().date() - timedelta(days=30 * max(months, 1))
     clean: List[Dict[str, Any]] = []
     for tx in transactions:
+        if (tx.get("transaction_type") or "").lower() == "deposit":
+            continue
         amount = float(tx.get("amount") or 0)
         if amount <= 0:
             continue
