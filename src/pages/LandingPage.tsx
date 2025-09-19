@@ -24,7 +24,7 @@ export default function LandingPage() {
           </p>
           <h1 className="text-4xl md:text-6xl font-bold text-white leading-tight">
             Inflate-Wise
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-primary-400 to-primary-200">
+            <span className="block bg-gradient-to-r from-white via-primary-200 to-accent-emerald text-transparent bg-clip-text">
               Your AI Co-Pilot for Beating Personal Inflation
             </span>
           </h1>
