@@ -2,6 +2,7 @@
 import { ReactNode } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/context/Auth";
+import { Skeleton, SkeletonGroup } from "./Skeleton";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -14,10 +15,14 @@ export default function ProtectedRoute({ children, requiresNessie = false, requi
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
-          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-black">Loading...</p>
+      <div className="min-h-screen bg-dark-100 flex items-center justify-center px-4">
+        <div className="w-full max-w-md bg-dark-200 border border-dark-400 rounded-2xl shadow-xl p-8 space-y-6">
+          <div className="space-y-3">
+            <Skeleton className="h-6 w-32" />
+            <Skeleton className="h-4 w-48" />
+          </div>
+          <SkeletonGroup count={3} itemClassName="h-12 w-full bg-dark-300/70" />
+          <Skeleton className="h-10 w-full bg-dark-300/70" />
         </div>
       </div>
     );

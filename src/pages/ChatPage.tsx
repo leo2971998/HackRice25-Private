@@ -13,7 +13,7 @@ import QuickChips from "@/components/QuickChips";
 import SourceCard from "@/components/SourceCard";
 import { MessageCircle, Sparkles, Send, Plus, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/Auth";
 
 const WELCOME_MESSAGE: ChatMsg = {
@@ -44,6 +44,8 @@ export default function ChatPage() {
   const { user } = useAuth();
   const isAuthenticated = Boolean(user);
 
+  const location = useLocation();
+  const nav = useNavigate();
   const [sessions, setSessions] = useState<ChatSessionSummary[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMsg[]>([WELCOME_MESSAGE]);
@@ -69,6 +71,14 @@ export default function ChatPage() {
       toast.error("Unable to load saved conversations");
     });
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    const state = location.state as { prefillPrompt?: string } | null;
+    if (state?.prefillPrompt) {
+      setInput(state.prefillPrompt);
+      nav(location.pathname, { replace: true });
+    }
+  }, [location, nav]);
 
   useEffect(() => {
     const container = listRef.current;

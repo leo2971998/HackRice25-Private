@@ -2,24 +2,32 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     // Users can only read their own data, but anyone can create a user.
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userIdField) {
+      return isSignedIn() && request.auth.uid == userIdField;
+    }
+
     match /users/{userId} {
-      allow read, update, delete: if request.auth != null && request.auth.uid == userId;
-      allow create: if request.auth != null;
+      allow read, update, delete: if isOwner(userId);
+      allow create: if isSignedIn() && request.resource.data.user_id == request.auth.uid;
     }
 
     // Users can only read and write their own chat sessions.
     match /chat_sessions/{sessionId} {
-      allow read, write: if request.auth != null && request.auth.uid == resource.data.user_id;
+      allow read, write: if isOwner(resource.data.user_id) || (request.resource != null && isOwner(request.resource.data.user_id));
     }
 
     // Users can only access their own AP2 transactions
     match /ap2_transactions/{transactionId} {
-      allow read, write: if request.auth != null && request.auth.uid == resource.data.user_id;
+      allow read, write: if isOwner(resource.data.user_id) || (request.resource != null && isOwner(request.resource.data.user_id));
     }
 
     // Users can only access their own agent state
     match /agent_state/{stateId} {
-      allow read, write: if request.auth != null && request.auth.uid == resource.data.user_id;
+      allow read, write: if isOwner(resource.data.user_id) || (request.resource != null && isOwner(request.resource.data.user_id));
     }
 
     // Health checks can be read by anyone for system monitoring

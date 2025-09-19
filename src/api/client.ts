@@ -100,3 +100,46 @@ export async function fetchChatSession(sessionId: string) {
     messages,
   } satisfies ChatSessionDetail;
 }
+
+export interface MandateResponse {
+  success?: boolean;
+  mandate?: any;
+  message?: string;
+  execution_result?: any;
+}
+
+export async function approveMandate(mandateId: string) {
+  const { data } = await api.post<MandateResponse>(`/api/ap2/mandates/${mandateId}/approve`);
+  return data;
+}
+
+export async function executeMandate(mandateId: string) {
+  const { data } = await api.post<MandateResponse>(`/api/ap2/mandates/${mandateId}/execute`);
+  return data;
+}
+
+export async function cancelMandate(mandateId: string) {
+  const { data } = await api.post<MandateResponse>(`/api/ap2/mandates/${mandateId}/cancel`);
+  return data;
+}
+
+export interface TransactionPayload {
+  amount: number;
+  description: string;
+  date: string;
+}
+
+export async function createDeposit(payload: TransactionPayload) {
+  const { data } = await api.post("/me/transactions/deposits", payload);
+  return data as { transaction: any; total_balance?: number };
+}
+
+export async function createPurchase(payload: TransactionPayload) {
+  const { data } = await api.post("/me/transactions/purchases", payload);
+  return data as { transaction: any; total_balance?: number };
+}
+
+export async function categorizeTransaction(payload: { category_key: string; category: string }) {
+  const { data } = await api.post("/me/transactions/categorize", payload);
+  return data as { category_key: string; category: string; persisted: boolean };
+}
