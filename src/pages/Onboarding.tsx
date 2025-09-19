@@ -75,14 +75,14 @@ export default function Onboarding() {
         <Card className="bg-dark-200/60 border border-dark-400/60">
           <CardHeader>
             <CardTitle className="text-white text-2xl">Connect your accounts</CardTitle>
-            <p className="text-dark-300 text-sm">
+            <p className="text-dark-800 text-sm">
               Inflate-Wise uses Plaid to securely pull transactions so Gemini can personalise your inflation model.
             </p>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="bg-dark-300/50 border border-dark-400/60 rounded-xl p-6 space-y-4">
               <h3 className="text-lg font-semibold text-white">Step 1 · Generate a Plaid Link token</h3>
-              <p className="text-dark-300 text-sm">
+              <p className="text-dark-800 text-sm">
                 In production this token is passed into Plaid Link on the client. For the hackathon sandbox, click the button to create a token and preview the payload.
               </p>
               <button
@@ -101,7 +101,7 @@ export default function Onboarding() {
 
             <div className="bg-dark-300/50 border border-dark-400/60 rounded-xl p-6 space-y-4">
               <h3 className="text-lg font-semibold text-white">Step 2 · Complete sandbox linking</h3>
-              <p className="text-dark-300 text-sm">
+              <p className="text-dark-800 text-sm">
                 Normally Plaid Link returns a public token. We simulate that handshake here so you can move straight to the dashboard.
               </p>
               <button
@@ -126,7 +126,7 @@ export default function Onboarding() {
                   </div>
                 </>
               ) : (
-                <p className="text-dark-300 text-sm">No financial institutions linked yet.</p>
+                <p className="text-dark-800 text-sm">No financial institutions linked yet.</p>
               )}
             </div>
           </CardContent>

@@ -132,7 +132,7 @@ export default function Dashboard() {
   const renderRateBadge = (value: number | null, label: string) => {
     if (value === null || Number.isNaN(value)) {
       return (
-        <div className="flex items-center gap-2 text-dark-900 text-sm">
+        <div className="flex items-center gap-2 text-dark-200 text-sm">
           <Loader2 className="w-4 h-4 animate-spin" />
           Calculating {label}
         </div>
@@ -233,7 +233,7 @@ export default function Dashboard() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-semibold text-white">Welcome back{user?.first_name ? `, ${user.first_name}` : ""}</h1>
-          <p className="text-dark-900">Here is the latest snapshot of your personal inflation.</p>
+          <p className="text-dark-200">Here is the latest snapshot of your personal inflation.</p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <button
@@ -270,11 +270,11 @@ export default function Dashboard() {
             </CardTitle>
             {renderRateBadge(personalRate, "personal inflation")}
           </CardHeader>
-          <CardContent className="space-y-3 text-dark-900">
+          <CardContent className="space-y-3 text-dark-200">
             <p>
               National CPI: <span className="text-white font-semibold">{nationalRate !== null ? `${nationalRate.toFixed(2)}%` : "Loading"}</span>
             </p>
-            <p className="text-sm text-dark-800">
+            <p className="text-sm text-dark-200">
               Weighted using the last 30 days of your spending, mapped directly to Bureau of Labor Statistics categories.
             </p>
           </CardContent>
@@ -289,7 +289,7 @@ export default function Dashboard() {
             <Sparkles className="w-5 h-5 text-orange-300" />
           </CardHeader>
           <CardContent>
-            <ul className="space-y-2 text-dark-900 text-sm">
+            <ul className="space-y-2 text-dark-200 text-sm">
               {(inflation?.top_drivers || []).length ? (
                 inflation!.top_drivers.map(driver => (
                   <li key={driver} className="flex justify-between">
@@ -298,7 +298,7 @@ export default function Dashboard() {
                   </li>
                 ))
               ) : (
-                <li className="text-dark-800">Not enough data yet. Refresh after more transactions sync.</li>
+                <li className="text-dark-200">Not enough data yet. Refresh after more transactions sync.</li>
               )}
             </ul>
           </CardContent>
@@ -313,7 +313,7 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent className="space-y-2">
             {Object.entries(categoryTotals).length ? (
-              <div className="space-y-2 text-sm text-dark-900">
+              <div className="space-y-2 text-sm text-dark-200">
                 {Object.entries(categoryTotals)
                   .sort((a, b) => b[1] - a[1])
                   .map(([category, value]) => (
@@ -330,7 +330,7 @@ export default function Dashboard() {
                   ))}
               </div>
             ) : (
-              <p className="text-dark-800 text-sm">We are waiting on transactions from your institution.</p>
+              <p className="text-dark-200 text-sm">We are waiting on transactions from your institution.</p>
             )}
           </CardContent>
         </Card>
@@ -340,13 +340,13 @@ export default function Dashboard() {
         <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <CardTitle className="text-white text-xl">Recent transactions</CardTitle>
-            <p className="text-dark-900 text-sm">Override categories to fine tune your inflation model.</p>
+            <p className="text-dark-200 text-sm">Override categories to fine tune your inflation model.</p>
           </div>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           <table className="min-w-full text-left text-sm">
             <thead>
-              <tr className="text-dark-800 border-b border-dark-400/40">
+              <tr className="text-dark-200 border-b border-dark-400/40">
                 <th className="py-3 pr-4 font-medium">Merchant</th>
                 <th className="py-3 pr-4 font-medium">Date</th>
                 <th className="py-3 pr-4 font-medium">Amount</th>
@@ -356,7 +356,7 @@ export default function Dashboard() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={4} className="py-8 text-center text-dark-800">
+                  <td colSpan={4} className="py-8 text-center text-dark-200">
                     <Loader2 className="w-5 h-5 animate-spin mx-auto" />
                   </td>
                 </tr>
@@ -366,7 +366,7 @@ export default function Dashboard() {
                   return (
                     <tr key={tx.transaction_id} className="border-b border-dark-400/30 last:border-0">
                       <td className="py-3 pr-4 text-white">{tx.merchant_name || tx.name}</td>
-                      <td className="py-3 pr-4 text-dark-900">{new Date(tx.date).toLocaleDateString()}</td>
+                      <td className="py-3 pr-4 text-dark-200">{new Date(tx.date).toLocaleDateString()}</td>
                       <td className={`py-3 pr-4 ${isDeposit ? "text-emerald-300" : "text-white"}`}>
                         {isDeposit ? "+" : "-"}${tx.amount.toFixed(2)}
                       </td>
@@ -388,7 +388,7 @@ export default function Dashboard() {
                 })
               ) : (
                 <tr>
-                  <td colSpan={4} className="py-6 text-center text-dark-800">
+                  <td colSpan={4} className="py-6 text-center text-dark-200">
                     No recent transactions found. Make a purchase and refresh to see the magic.
                   </td>
                 </tr>
@@ -401,12 +401,12 @@ export default function Dashboard() {
       <Card className="bg-dark-200/40 border border-dark-400/60">
         <CardHeader>
           <CardTitle className="text-white text-xl">Receipt intelligence</CardTitle>
-          <p className="text-dark-900 text-sm">Paste grocery line items to see how Gemini Vision narrates the spend.</p>
+          <p className="text-dark-200 text-sm">Paste grocery line items to see how Gemini Vision narrates the spend.</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={submitReceiptForAnalysis} className="grid md:grid-cols-2 gap-6">
             <div className="space-y-3">
-              <label className="text-sm text-dark-900 font-medium">Receipt items (one per line)</label>
+              <label className="text-sm text-dark-200 font-medium">Receipt items (one per line)</label>
               <textarea
                 value={receiptItems}
                 onChange={event => setReceiptItems(event.target.value)}
@@ -416,7 +416,7 @@ export default function Dashboard() {
             </div>
             <div className="space-y-4">
               <div className="space-y-3">
-                <label className="text-sm text-dark-900 font-medium">Total</label>
+                <label className="text-sm text-dark-200 font-medium">Total</label>
                 <input
                   value={receiptTotal}
                   onChange={event => setReceiptTotal(event.target.value)}
@@ -434,7 +434,7 @@ export default function Dashboard() {
                 Analyse receipt
               </button>
               {receiptSummary && (
-                <div className="rounded-xl bg-dark-300/50 border border-dark-400 px-4 py-3 text-sm text-dark-900">
+                <div className="rounded-xl bg-dark-300/50 border border-dark-400 px-4 py-3 text-sm text-dark-200">
                   {receiptSummary}
                 </div>
               )}
@@ -456,14 +456,14 @@ export default function Dashboard() {
               <button
                 type="button"
                 onClick={() => closeDepositModal()}
-                className="text-dark-900 hover:text-white transition"
+                className="text-dark-200 hover:text-white transition"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
             <form onSubmit={handleCreateDeposit} className="space-y-4 text-sm text-white">
               <div>
-                <label className="block text-dark-900 mb-1 font-medium">Source</label>
+                <label className="block text-dark-200 mb-1 font-medium">Source</label>
                 <input
                   value={depositSource}
                   onChange={event => setDepositSource(event.target.value)}
@@ -473,7 +473,7 @@ export default function Dashboard() {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-dark-900 mb-1 font-medium">Amount</label>
+                  <label className="block text-dark-200 mb-1 font-medium">Amount</label>
                   <input
                     value={depositAmount}
                     onChange={event => setDepositAmount(event.target.value)}
@@ -486,7 +486,7 @@ export default function Dashboard() {
                   />
                 </div>
                 <div>
-                  <label className="block text-dark-900 mb-1 font-medium">Date</label>
+                  <label className="block text-dark-200 mb-1 font-medium">Date</label>
                   <input
                     value={depositDate}
                     onChange={event => setDepositDate(event.target.value)}
@@ -496,7 +496,7 @@ export default function Dashboard() {
                 </div>
               </div>
               <div>
-                <label className="block text-dark-900 mb-1 font-medium">Notes (optional)</label>
+                <label className="block text-dark-200 mb-1 font-medium">Notes (optional)</label>
                 <textarea
                   value={depositNotes}
                   onChange={event => setDepositNotes(event.target.value)}
@@ -509,7 +509,7 @@ export default function Dashboard() {
                 <button
                   type="button"
                   onClick={() => closeDepositModal()}
-                  className="inline-flex items-center gap-2 rounded-lg border border-dark-400 px-4 py-2 text-dark-900 hover:text-white transition"
+                  className="inline-flex items-center gap-2 rounded-lg border border-dark-400 px-4 py-2 text-dark-200 hover:text-white transition"
                 >
                   Cancel
                 </button>
@@ -540,7 +540,7 @@ export default function Dashboard() {
               <button
                 type="button"
                 onClick={() => closePurchaseModal()}
-                className="text-dark-900 hover:text-white transition"
+                className="text-dark-200 hover:text-white transition"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -548,7 +548,7 @@ export default function Dashboard() {
             <form onSubmit={handleCreatePurchase} className="space-y-4 text-sm text-white">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-dark-900 mb-1 font-medium">Merchant</label>
+                  <label className="block text-dark-200 mb-1 font-medium">Merchant</label>
                   <input
                     value={purchaseMerchant}
                     onChange={event => setPurchaseMerchant(event.target.value)}
@@ -557,7 +557,7 @@ export default function Dashboard() {
                   />
                 </div>
                 <div>
-                  <label className="block text-dark-900 mb-1 font-medium">Date</label>
+                  <label className="block text-dark-200 mb-1 font-medium">Date</label>
                   <input
                     value={purchaseDate}
                     onChange={event => setPurchaseDate(event.target.value)}
@@ -568,7 +568,7 @@ export default function Dashboard() {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-dark-900 mb-1 font-medium">Amount</label>
+                  <label className="block text-dark-200 mb-1 font-medium">Amount</label>
                   <input
                     value={purchaseAmount}
                     onChange={event => setPurchaseAmount(event.target.value)}
@@ -581,7 +581,7 @@ export default function Dashboard() {
                   />
                 </div>
                 <div>
-                  <label className="block text-dark-900 mb-1 font-medium">Category</label>
+                  <label className="block text-dark-200 mb-1 font-medium">Category</label>
                   <select
                     value={purchaseCategory}
                     onChange={event => setPurchaseCategory(event.target.value)}
@@ -596,7 +596,7 @@ export default function Dashboard() {
                 </div>
               </div>
               <div>
-                <label className="block text-dark-900 mb-1 font-medium">Notes (optional)</label>
+                <label className="block text-dark-200 mb-1 font-medium">Notes (optional)</label>
                 <textarea
                   value={purchaseNotes}
                   onChange={event => setPurchaseNotes(event.target.value)}
@@ -609,7 +609,7 @@ export default function Dashboard() {
                 <button
                   type="button"
                   onClick={() => closePurchaseModal()}
-                  className="inline-flex items-center gap-2 rounded-lg border border-dark-400 px-4 py-2 text-dark-900 hover:text-white transition"
+                  className="inline-flex items-center gap-2 rounded-lg border border-dark-400 px-4 py-2 text-dark-200 hover:text-white transition"
                 >
                   Cancel
                 </button>

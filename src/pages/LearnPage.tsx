@@ -77,7 +77,7 @@ export default function LearnPage() {
             <Brain className="w-10 h-10 text-primary-300" />
             <div>
               <CardTitle className="text-white text-2xl">Inflation Academy</CardTitle>
-              <p className="text-dark-900 text-sm">
+              <p className="text-dark-200 text-sm">
                 Master the concepts behind Inflate-Wise so you can explain the magic to judges, mentors, and future users.
               </p>
             </div>
@@ -96,7 +96,7 @@ export default function LearnPage() {
               <insight.icon className="w-6 h-6 text-primary-300" />
               <CardTitle className="text-white text-lg">{insight.title}</CardTitle>
             </CardHeader>
-            <CardContent className="text-sm text-dark-900">{insight.description}</CardContent>
+            <CardContent className="text-sm text-dark-200">{insight.description}</CardContent>
           </Card>
         ))}
       </div>
@@ -126,7 +126,7 @@ export default function LearnPage() {
             {MODULES.filter(module => module.id === activeModule).map(module => (
               <div key={module.id} className="space-y-3">
                 <h3 className="text-white text-lg font-semibold">{module.title}</h3>
-                <p className="text-dark-900 text-sm">{module.description}</p>
+                <p className="text-dark-200 text-sm">{module.description}</p>
                 <ul className="space-y-2 text-sm text-dark-50">
                   {module.points.map(point => (
                     <li key={point} className="flex items-start gap-2">
@@ -146,7 +146,7 @@ export default function LearnPage() {
           <TrendingUp className="w-6 h-6 text-primary-300" />
           <CardTitle className="text-white text-xl">Pitch-ready talking points</CardTitle>
         </CardHeader>
-        <CardContent className="grid md:grid-cols-2 gap-6 text-sm text-dark-900">
+        <CardContent className="grid md:grid-cols-2 gap-6 text-sm text-dark-200">
           <div className="space-y-3">
             <h4 className="text-white font-semibold">Problem</h4>
             <p>Generic inflation numbers hide the reality of rapid price changes in certain categories.</p>

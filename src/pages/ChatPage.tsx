@@ -76,7 +76,7 @@ export default function ChatPage() {
               </div>
             ))}
             {loading && (
-              <div className="max-w-[85%] bg-dark-300/60 border border-dark-400 rounded-2xl px-4 py-3 text-sm text-dark-900 flex items-center gap-3">
+              <div className="max-w-[85%] bg-dark-300/60 border border-dark-400 rounded-2xl px-4 py-3 text-sm text-dark-200 flex items-center gap-3">
                 <Loader2 className="w-4 h-4 animate-spin text-primary-300" />
                 Analysing your latest transactions...
               </div>
@@ -128,7 +128,7 @@ export default function ChatPage() {
           <CardHeader>
             <CardTitle className="text-white text-lg">What can I do?</CardTitle>
           </CardHeader>
-          <CardContent className="text-sm text-dark-900 space-y-3">
+          <CardContent className="text-sm text-dark-200 space-y-3">
             <p>• Ask for a breakdown of what caused last month's personal inflation.</p>
             <p>• Get actionable steps to control a specific category like groceries or travel.</p>
             <p>• Upload a receipt on the dashboard and ask the assistant to interpret it.</p>
