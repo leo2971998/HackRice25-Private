@@ -156,7 +156,6 @@ def update_user(user_id: str):
     new_role = (payload.get("role") or "user").strip().lower()
     if new_role not in {"user", "admin"}:
         return jsonify(error="Role must be 'user' or 'admin'."), 400
-
     user, _ = firestore_get_user(user_id)
     if not user:
         return jsonify(error="User not found."), 404

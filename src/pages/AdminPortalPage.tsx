@@ -48,7 +48,6 @@ export default function AdminPortalPage() {
       setSavingId(null);
     }
   };
-
   const handleDelete = async (userId: string) => {
     try {
       setRemovingId(userId);
