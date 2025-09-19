@@ -30,9 +30,16 @@ service cloud.firestore {
       allow read, write: if isOwner(resource.data.user_id) || (request.resource != null && isOwner(request.resource.data.user_id));
     }
 
+    // Users can only access their own manual banking transactions
+    match /bank_transactions/{transactionId} {
+      allow read, update, delete: if isOwner(resource.data.user_id);
+      allow create: if isSignedIn() && request.resource.data.user_id == request.auth.uid;
+    }
+
     // Health checks can be read by anyone for system monitoring
     match /health_checks/{document} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if false;
     }
   }
 }

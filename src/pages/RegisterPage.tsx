@@ -43,13 +43,13 @@ export default function RegisterPage() {
       <div className="max-w-2xl w-full bg-dark-200 border border-dark-400 rounded-2xl shadow-xl p-8">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-white mb-2">Join Houston Financial Navigator</h1>
-          <p className="text-dark-900">Create your account to start your financial journey</p>
+          <p className="text-dark-300">Create your account to start your financial journey</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 text-white">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="first_name" className="block text-sm font-medium text-dark-900 mb-1">
+              <label htmlFor="first_name" className="block text-sm font-medium text-dark-200 mb-1">
                 First Name
               </label>
               <input
@@ -63,7 +63,7 @@ export default function RegisterPage() {
               />
             </div>
             <div>
-              <label htmlFor="last_name" className="block text-sm font-medium text-dark-900 mb-1">
+              <label htmlFor="last_name" className="block text-sm font-medium text-dark-200 mb-1">
                 Last Name
               </label>
               <input
@@ -79,7 +79,7 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-dark-900 mb-1">
+            <label htmlFor="email" className="block text-sm font-medium text-dark-200 mb-1">
               Email
             </label>
             <input
@@ -95,7 +95,7 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-dark-900 mb-1">
+            <label htmlFor="password" className="block text-sm font-medium text-dark-200 mb-1">
               Password
             </label>
             <input
@@ -127,7 +127,7 @@ export default function RegisterPage() {
         </form>
 
         <div className="mt-6 text-center">
-          <p className="text-dark-900">
+          <p className="text-dark-300">
             Already have an account?{" "}
             <Link to="/login" className="text-primary-500 hover:text-primary-400 font-medium">
               Sign in
